@@ -111,39 +111,38 @@ import {
   getDoc, doc, addDoc, updateDoc, collection, getDocs, query, where, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
+// ---------------- ELEMENTS ----------------
 const loader = document.getElementById("loader");
-const statusBox = document.getElementById("status");
 const currentUser = JSON.parse(localStorage.getItem("loggedUser"));
 if (!currentUser) window.location.href = "./";
 
-// Elements
 const userName = document.getElementById("userName");
 const markBtn = document.getElementById("markBtn");
 const checkoutBtn = document.getElementById("checkout");
 const brkoutBtn = document.getElementById("brkout");
 const brkinBtn = document.getElementById("brkin");
 
-// Display elements
 const inTimeEl = document.getElementById("inTime");
 const outTimeEl = document.getElementById("outTime");
 const breakOutTimeEl = document.getElementById("breakOutTime");
 const breakInTimeEl = document.getElementById("breakInTime");
 const breakPurposeEl = document.getElementById("breakPurpose");
+const branchEl = document.getElementById("branchSelect");
+const branchEl1 = document.getElementById("branchSelect1");
 
 userName.textContent = currentUser.user;
 
+// ---------------- LOAD BRANCH ----------------
 const branchRef = doc(db, "branches", currentUser.branchId);
 const branchDoc = await getDoc(branchRef);
 let branch = null;
 if (branchDoc.exists()) {
   branch = branchDoc.data();
-
-  // Branch name
-  document.getElementById("branchSelect").textContent = branch.name;
-  document.getElementById("branchSelect1").textContent = branch.name;
+  branchEl.textContent = branch.name;
+  branchEl1.textContent = branch.name;
 }
 
-// utility - distance
+// ---------------- UTILITY ----------------
 function getDistance(lat1, lon1, lat2, lon2) {
   const R = 6371000;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -154,33 +153,66 @@ function getDistance(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// Load today record
+// ---------------- DATE-TIME FORMAT ----------------
+function formatDateTime(timestamp) {
+  const d = timestamp instanceof Date ? timestamp : timestamp.toDate();
+  const day = String(d.getDate()).padStart(2,'0');
+  const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const month = monthNames[d.getMonth()];
+  const year = d.getFullYear();
+
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2,'0');
+  const seconds = String(d.getSeconds()).padStart(2,'0');
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+
+  return `${day} ${month} ${year} : ${String(hours).padStart(2,'0')}:${minutes}:${seconds} ${ampm}`;
+}
+
+// ---------------- LOAD TODAY ATTENDANCE ----------------
 const todayStr = new Date().toISOString().slice(0,10);
 const attQuery = query(collection(db, "attendance"),
   where("userId", "==", currentUser.id),
   where("dateStr", "==", todayStr)
 );
-const attSnap = await getDocs(attQuery);
+
 let attRef = null;
 let attData = null;
 
+const attSnap = await getDocs(attQuery);
 if (!attSnap.empty) {
   attRef = attSnap.docs[0].ref;
   attData = attSnap.docs[0].data();
 
   if (attData.time)
-    inTimeEl.textContent = new Date(attData.time.toDate()).toLocaleString();
-  if (attData.checkoutTime)
-    outTimeEl.textContent = new Date(attData.checkoutTime.toDate()).toLocaleString();
+    inTimeEl.textContent = formatDateTime(attData.time);
+  if (attData.outTime)
+    outTimeEl.textContent = formatDateTime(attData.outTime);
   if (attData.breakOutTime)
-    breakOutTimeEl.textContent = new Date(attData.breakOutTime.toDate()).toLocaleString();
+    breakOutTimeEl.textContent = formatDateTime(attData.breakOutTime);
   if (attData.breakInTime)
-    breakInTimeEl.textContent = new Date(attData.breakInTime.toDate()).toLocaleString();
+    breakInTimeEl.textContent = formatDateTime(attData.breakInTime);
   if (attData.breakPurpose)
     breakPurposeEl.textContent = attData.breakPurpose;
 }
 
-// ---------------------- CHECK-IN ----------------------
+// ---------------- BUTTON STATE ----------------
+function updateButtonState() {
+  if (!attData) {
+    checkoutBtn.disabled = true;
+    brkoutBtn.disabled = true;
+    brkinBtn.disabled = true;
+    return;
+  }
+
+  checkoutBtn.disabled = !!attData.outTime;
+  brkoutBtn.disabled = !!attData.breakOutTime || !!attData.outTime;
+  brkinBtn.disabled = !attData.breakOutTime || !!attData.breakInTime || !!attData.outTime;
+}
+updateButtonState();
+
+// ---------------- CHECK-IN ----------------
 markBtn.onclick = async () => {
   loader.style.display = "flex";
   navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -198,7 +230,7 @@ markBtn.onclick = async () => {
       return alert("⚠️ Already Checked In Today!");
     }
 
-    await addDoc(collection(db, "attendance"), {
+    const docRef = await addDoc(collection(db, "attendance"), {
       userId: currentUser.id,
       username: currentUser.username,
       branchId: currentUser.branchId,
@@ -208,29 +240,26 @@ markBtn.onclick = async () => {
       location: { lat: latitude, lng: longitude, distance }
     });
 
-    loader.style.display = "none";
-    alert("✅ Checked In Successfully!");
-    inTimeEl.textContent = new Date().toLocaleString();
+    attRef = docRef;
+    attData = { userId: currentUser.id, time: { toDate: () => new Date() } };
 
-    // enable checkout, break
-    checkoutBtn.disabled = false;
-    brkoutBtn.disabled = false;
+    inTimeEl.textContent = formatDateTime(attData.time);
+    alert("✅ Checked In Successfully!");
+    updateButtonState();
+    loader.style.display = "none";
   });
 };
 
-// ---------------------- CHECK-OUT ----------------------
+// ---------------- CHECK-OUT ----------------
 checkoutBtn.onclick = async () => {
   if (!attRef) return alert("⚠️ You must Check In first!");
   if (attData?.outTime) return alert("✅ You already Checked Out!");
 
-  // Show popup
   const popup = document.getElementById("checkoutPopup");
   popup.style.display = "flex";
-
   const confirmBtn = document.getElementById("checkoutConfirm");
   const cancelBtn = document.getElementById("checkoutCancel");
-
-  const closePopup = () => (popup.style.display = "none");
+  const closePopup = () => popup.style.display = "none";
   cancelBtn.onclick = closePopup;
 
   confirmBtn.onclick = async () => {
@@ -245,46 +274,34 @@ checkoutBtn.onclick = async () => {
         return alert("❌ Outside branch area!");
       }
 
-      await updateDoc(attRef, {
-        outTime: serverTimestamp()
-      });
+      await updateDoc(attRef, { outTime: serverTimestamp() });
+      attData.outTime = { toDate: () => new Date() };
+      outTimeEl.textContent = formatDateTime(attData.outTime);
 
-      loader.style.display = "none";
-      outTimeEl.textContent = new Date().toLocaleString();
       alert("✅ Checked Out Successfully!");
-
-      // Disable buttons after checkout
-      checkoutBtn.disabled = true;
-      brkoutBtn.disabled = true;
-      brkinBtn.disabled = true;
+      updateButtonState();
+      loader.style.display = "none";
     });
   };
 };
 
-// ---------------------- BREAK-OUT ----------------------
+// ---------------- BREAK-OUT ----------------
 brkoutBtn.onclick = async () => {
   if (!attRef) return alert("⚠️ You must Check In first!");
   if (attData?.breakOutTime) return alert("⚠️ You already took a break!");
 
-  // Show popup
   const popup = document.getElementById("breakPopup");
   popup.style.display = "flex";
-
   const input = document.getElementById("breakPurposeInput");
   const confirmBtn = document.getElementById("breakConfirm");
   const cancelBtn = document.getElementById("breakCancel");
-
-  // Clear old input
   input.value = "";
-
-  const closePopup = () => (popup.style.display = "none");
-
+  const closePopup = () => popup.style.display = "none";
   cancelBtn.onclick = closePopup;
 
   confirmBtn.onclick = async () => {
     const purpose = input.value.trim();
     if (!purpose) return alert("Please enter a break reason!");
-
     closePopup();
     loader.style.display = "flex";
 
@@ -296,56 +313,42 @@ brkoutBtn.onclick = async () => {
         return alert("❌ Outside branch area!");
       }
 
-      await updateDoc(attRef, {
-        breakOutTime: serverTimestamp(),
-        breakPurpose: purpose
-      });
+      await updateDoc(attRef, { breakOutTime: serverTimestamp(), breakPurpose: purpose });
+      attData.breakOutTime = { toDate: () => new Date() };
+      attData.breakPurpose = purpose;
 
-      loader.style.display = "none";
-      breakOutTimeEl.textContent = new Date().toLocaleString();
+      breakOutTimeEl.textContent = formatDateTime(attData.breakOutTime);
       breakPurposeEl.textContent = purpose;
       alert("☕ Break Out Recorded!");
-      brkoutBtn.disabled = true;
-      brkinBtn.disabled = false;
+      updateButtonState();
+      loader.style.display = "none";
     });
   };
 };
 
-
-// ---------------------- BREAK-IN ----------------------
+// ---------------- BREAK-IN ----------------
 brkinBtn.onclick = async () => {
   if (!attRef) return alert("⚠️ Check In first!");
   if (!attData?.breakOutTime) return alert("⚠️ You haven't done Break Out!");
   if (attData?.breakInTime) return alert("✅ Already Break In done!");
 
   await updateDoc(attRef, { breakInTime: serverTimestamp() });
-  breakInTimeEl.textContent = new Date().toLocaleString();
+  attData.breakInTime = { toDate: () => new Date() };
+  breakInTimeEl.textContent = formatDateTime(attData.breakInTime);
+
   alert("✅ Break In Done!");
-  brkinBtn.disabled = true;
+  updateButtonState();
 };
 
-// ---------------------- Disable Buttons Initially ----------------------
-if (!attData) {
-  checkoutBtn.disabled = true;
-  brkoutBtn.disabled = true;
-  brkinBtn.disabled = true;
-} else {
-  if (attData.checkoutTime) {
-    checkoutBtn.disabled = true;
-    brkoutBtn.disabled = true;
-    brkinBtn.disabled = true;
-  } else {
-    checkoutBtn.disabled = false;
-    brkoutBtn.disabled = !attData.time;
-    brkinBtn.disabled = !attData.breakOutTime;
-  }
-}
-// sign out
+// ---------------- SIGN OUT ----------------
 document.getElementById("signOutBtn").addEventListener("click", () => {
   localStorage.removeItem("loggedUser");
   window.location.href = "./";
 });
 </script>
+
+
+
 
 </body>
 </html>
