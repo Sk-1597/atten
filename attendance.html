@@ -124,7 +124,13 @@ userName.textContent = currentUser.user;
 const branchRef = doc(db, "branches", currentUser.branchId);
 const branchDoc = await getDoc(branchRef);
 let branch = null;
-if (branchDoc.exists()) branch = branchDoc.data();
+if (branchDoc.exists()) {
+  branch = branchDoc.data();
+
+  // ബ്രാഞ്ച് നെയിം സെറ്റ് ചെയ്യുക
+  document.getElementById("branchSelect").textContent = branch.name;
+  document.getElementById("branchSelect1").textContent = branch.name;
+}
 
 // utility - distance
 function getDistance(lat1, lon1, lat2, lon2) {
@@ -284,3 +290,4 @@ document.getElementById("signOutBtn").addEventListener("click", () => {
 
 </body>
 </html>
+
