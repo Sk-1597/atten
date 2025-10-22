@@ -93,6 +93,17 @@
   </div>
 </div>
 
+<!-- Check Out Popup -->
+<div id="checkoutPopup" class="popup-overlay">
+  <div class="popup">
+    <h3>Check Out</h3>
+    <p>Are you sure you want to check out?</p>
+    <div class="popup-buttons">
+      <button id="checkoutConfirm" class="btn confirm">Yes, Check Out</button>
+      <button id="checkoutCancel" class="btn cancel">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <script type="module">
 import { db } from './firebase.js';
@@ -127,7 +138,7 @@ let branch = null;
 if (branchDoc.exists()) {
   branch = branchDoc.data();
 
-  // ബ്രാഞ്ച് നെയിം സെറ്റ് ചെയ്യുക
+  // Branch name
   document.getElementById("branchSelect").textContent = branch.name;
   document.getElementById("branchSelect1").textContent = branch.name;
 }
@@ -210,16 +221,44 @@ markBtn.onclick = async () => {
 // ---------------------- CHECK-OUT ----------------------
 checkoutBtn.onclick = async () => {
   if (!attRef) return alert("⚠️ You must Check In first!");
-  if (attData?.checkoutTime) return alert("✅ Already Checked Out!");
+  if (attData?.outTime) return alert("✅ You already Checked Out!");
 
-  const confirmOut = confirm("Do you really want to Check Out?");
-  if (!confirmOut) return;
+  // Show popup
+  const popup = document.getElementById("checkoutPopup");
+  popup.style.display = "flex";
 
-  await updateDoc(attRef, { checkoutTime: serverTimestamp() });
-  outTimeEl.textContent = new Date().toLocaleString();
-  alert("✅ Checked Out!");
-  checkoutBtn.disabled = true;
-  brkoutBtn.disabled = true;
+  const confirmBtn = document.getElementById("checkoutConfirm");
+  const cancelBtn = document.getElementById("checkoutCancel");
+
+  const closePopup = () => (popup.style.display = "none");
+  cancelBtn.onclick = closePopup;
+
+  confirmBtn.onclick = async () => {
+    closePopup();
+    loader.style.display = "flex";
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const { latitude, longitude } = pos.coords;
+      const distance = getDistance(latitude, longitude, branch.lat, branch.lng);
+      if (distance > branch.radius_m && currentUser.role !== "admin") {
+        loader.style.display = "none";
+        return alert("❌ Outside branch area!");
+      }
+
+      await updateDoc(attRef, {
+        outTime: serverTimestamp()
+      });
+
+      loader.style.display = "none";
+      outTimeEl.textContent = new Date().toLocaleString();
+      alert("✅ Checked Out Successfully!");
+
+      // Disable buttons after checkout
+      checkoutBtn.disabled = true;
+      brkoutBtn.disabled = true;
+      brkinBtn.disabled = true;
+    });
+  };
 };
 
 // ---------------------- BREAK-OUT ----------------------
@@ -227,31 +266,51 @@ brkoutBtn.onclick = async () => {
   if (!attRef) return alert("⚠️ You must Check In first!");
   if (attData?.breakOutTime) return alert("⚠️ You already took a break!");
 
-  const purpose = prompt("Enter break purpose:");
-  if (!purpose) return;
+  // Show popup
+  const popup = document.getElementById("breakPopup");
+  popup.style.display = "flex";
 
-  loader.style.display = "flex";
-  navigator.geolocation.getCurrentPosition(async (pos) => {
-    const { latitude, longitude } = pos.coords;
-    const distance = getDistance(latitude, longitude, branch.lat, branch.lng);
-    if (distance > branch.radius_m && currentUser.role !== "admin") {
+  const input = document.getElementById("breakPurposeInput");
+  const confirmBtn = document.getElementById("breakConfirm");
+  const cancelBtn = document.getElementById("breakCancel");
+
+  // Clear old input
+  input.value = "";
+
+  const closePopup = () => (popup.style.display = "none");
+
+  cancelBtn.onclick = closePopup;
+
+  confirmBtn.onclick = async () => {
+    const purpose = input.value.trim();
+    if (!purpose) return alert("Please enter a break reason!");
+
+    closePopup();
+    loader.style.display = "flex";
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const { latitude, longitude } = pos.coords;
+      const distance = getDistance(latitude, longitude, branch.lat, branch.lng);
+      if (distance > branch.radius_m && currentUser.role !== "admin") {
+        loader.style.display = "none";
+        return alert("❌ Outside branch area!");
+      }
+
+      await updateDoc(attRef, {
+        breakOutTime: serverTimestamp(),
+        breakPurpose: purpose
+      });
+
       loader.style.display = "none";
-      return alert("❌ Outside branch area!");
-    }
-
-    await updateDoc(attRef, {
-      breakOutTime: serverTimestamp(),
-      breakPurpose: purpose
+      breakOutTimeEl.textContent = new Date().toLocaleString();
+      breakPurposeEl.textContent = purpose;
+      alert("☕ Break Out Recorded!");
+      brkoutBtn.disabled = true;
+      brkinBtn.disabled = false;
     });
-
-    loader.style.display = "none";
-    breakOutTimeEl.textContent = new Date().toLocaleString();
-    breakPurposeEl.textContent = purpose;
-    alert("☕ Break Out Recorded!");
-    brkoutBtn.disabled = true;
-    brkinBtn.disabled = false;
-  });
+  };
 };
+
 
 // ---------------------- BREAK-IN ----------------------
 brkinBtn.onclick = async () => {
@@ -290,4 +349,3 @@ document.getElementById("signOutBtn").addEventListener("click", () => {
 
 </body>
 </html>
-
