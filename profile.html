@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Attendance</title>
+  <link rel="stylesheet" href="./resources/css/profile.css">
+  <link rel="stylesheet" href="./resources/css/main.css">
+</head>
+ <body class="attendance-page">
+
+  <header class="topbar">
+    <div class="user-info">
+      <img src="./resources/icons/user.png" class="user-icon" alt="User">   
+    </div>
+    <div class="top-icons">
+  <a href="./attendance.html">
+    <img src="./resources/icons/home.png" alt="Report" class="icon-btn">
+  </a>
+  <button id="signOutBtn" class="signout-btn">
+    <img src="./resources/icons/logout.png" alt="Logout" class="icon-btn">
+  </button>
+</div>
+  </header>
+  <div class="main-cont">
+  <div class="profile-logo">
+      <div class="logo-circle"><img src="./resources/icons/user.png" alt="artlogo" srcset=""></div>
+        <div class="usernme" style="font-weight: 800; font-size: 22px; text-transform: uppercase;"><p id="userName"></p></div>
+        
+    
+  <div class="user-detl">    
+    <p>✉️ 
+      Email :<span id="email"></span></p>
+    <p>📞 Mobile :<span id="Mobile"></span></p>    
+    <p>📅 Join Date:<span id="jDate"></span></p>
+    <p>🪪 Employe Code:<span id="eCode"></span></p>
+    <p>🏠 Address:<br><span id="address"></span></p> 
+</div>
+</div>
+</div>
+      <script type="module">
+  import { db } from './firebase.js';
+  import { getDoc, doc, addDoc, collection, getDocs, query, where, serverTimestamp } 
+    from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+  const currentUser = JSON.parse(localStorage.getItem("loggedUser"));
+  if (!currentUser) {
+    window.location.href = "index.html";
+  }
+
+  userName.textContent = currentUser.user;
+  email.textContent = currentUser.username;
+  Mobile.textContent = currentUser.mobile;
+  jDate.textContent = currentUser.jDate;
+  eCode.textContent = currentUser.eCode;
+  address.textContent = currentUser.address;
+  
+</script>
+</body>
+</html>

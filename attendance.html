@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance</title>
+<link rel="stylesheet" href="./resources/css/atten.css">
+<link rel="stylesheet" href="./resources/css/main.css">
+<style>
+
+</style>
+</head>
+<body class="attendance-page">
+
+<header class="topbar">
+  <div class="user-info">
+    <a href="./profile.html">
+      <img src="./resources/icons/user.png" alt="User">
+    </a>
+  </div>
+  <div class="top-icons">
+    <a href="./history.html">
+      <img src="./resources/icons/history.png" alt="Report" class="icon-btn">
+    </a>
+    <button id="signOutBtn" class="signout-btn">
+      <img src="./resources/icons/logout.png" alt="Logout" class="icon-btn">
+    </button>
+  </div>
+</header>
+
+<main class="content">
+  <p class="welcome-text">Welcome,</p>
+  <h2 id="userName">Loading...</h2>
+
+  <section class="card">
+    <div class="card-header">
+      <h3>Today Attendance</h3>
+      <div class="check-bttn">
+        <button id="markBtn" class="btn checkin">Check In</button>
+        <br>
+        <button id="checkout" class="btn checkout">Check Out</button>
+      </div>
+    </div>
+    <div class="card-body blue">
+      <p class="branch"><img src="./resources/icons/location.png"><span id="branchSelect"></span></p>
+      <p><img src="./resources/icons/checkin.png"><span id="inTime">--</span></p>
+      <p><img src="./resources/icons/checkout.png"><span id="outTime">--</span></p>
+    </div>
+  </section>
+
+  <section class="card brake">
+  <div class="card-header">
+    <h3>Break Time</h3>
+    <div class="check-bttn">
+      <button id="brkout" class="btn brkin">Out</button>
+      <br>
+      <button id="brkin" class="btn brkout">In</button>
+    </div>
+  </div>
+  <div class="card-body red">
+    <p class="branch"><img src="./resources/icons/location.png"><span id="branchSelect1"></span></p>
+
+    <p><img src="./resources/icons/checkout.png">
+      <span id="breakOutTime">--</span>
+    </p>
+
+    <p><img src="./resources/icons/checkin.png">
+      <span id="breakInTime">--</span>
+    </p>
+
+    <p><img src="./resources/icons/purpose.png">
+      <span id="breakPurpose">--</span>
+    </p>
+  </div>
+</section>
+
+
+  <div id="status" class="status-box"></div>
+</main>
+
+<div id="loader"><div class="spinner"></div></div>
+
+<!-- Break Purpose Popup -->
+<div id="breakPopup" class="popup-overlay">
+  <div class="popup">
+    <h3>Break Out</h3>
+    <p>Please enter the reason for break:</p>
+    <textarea id="breakPurposeInput" placeholder="e.g. Hospital, Bank visit..." rows="3"></textarea>
+    <div class="popup-buttons">
+      <button id="breakConfirm" class="btn confirm">Confirm</button>
+      <button id="breakCancel" class="btn cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<script type="module">
+import { db } from './firebase.js';
+import { 
+  getDoc, doc, addDoc, updateDoc, collection, getDocs, query, where, serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+const loader = document.getElementById("loader");
+const statusBox = document.getElementById("status");
+const currentUser = JSON.parse(localStorage.getItem("loggedUser"));
+if (!currentUser) window.location.href = "./";
+
+// Elements
+const userName = document.getElementById("userName");
+const markBtn = document.getElementById("markBtn");
+const checkoutBtn = document.getElementById("checkout");
+const brkoutBtn = document.getElementById("brkout");
+const brkinBtn = document.getElementById("brkin");
+
+// Display elements
+const inTimeEl = document.getElementById("inTime");
+const outTimeEl = document.getElementById("outTime");
+const breakOutTimeEl = document.getElementById("breakOutTime");
+const breakInTimeEl = document.getElementById("breakInTime");
+const breakPurposeEl = document.getElementById("breakPurpose");
+
+userName.textContent = currentUser.user;
+
+const branchRef = doc(db, "branches", currentUser.branchId);
+const branchDoc = await getDoc(branchRef);
+let branch = null;
+if (branchDoc.exists()) branch = branchDoc.data();
+
+// utility - distance
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 +
+            Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180) *
+            Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Load today record
+const todayStr = new Date().toISOString().slice(0,10);
+const attQuery = query(collection(db, "attendance"),
+  where("userId", "==", currentUser.id),
+  where("dateStr", "==", todayStr)
+);
+const attSnap = await getDocs(attQuery);
+let attRef = null;
+let attData = null;
+
+if (!attSnap.empty) {
+  attRef = attSnap.docs[0].ref;
+  attData = attSnap.docs[0].data();
+
+  if (attData.time)
+    inTimeEl.textContent = new Date(attData.time.toDate()).toLocaleString();
+  if (attData.checkoutTime)
+    outTimeEl.textContent = new Date(attData.checkoutTime.toDate()).toLocaleString();
+  if (attData.breakOutTime)
+    breakOutTimeEl.textContent = new Date(attData.breakOutTime.toDate()).toLocaleString();
+  if (attData.breakInTime)
+    breakInTimeEl.textContent = new Date(attData.breakInTime.toDate()).toLocaleString();
+  if (attData.breakPurpose)
+    breakPurposeEl.textContent = attData.breakPurpose;
+}
+
+// ---------------------- CHECK-IN ----------------------
+markBtn.onclick = async () => {
+  loader.style.display = "flex";
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const { latitude, longitude } = pos.coords;
+    const distance = getDistance(latitude, longitude, branch.lat, branch.lng);
+
+    if (distance > branch.radius_m && currentUser.role !== "admin") {
+      loader.style.display = "none";
+      return alert("❌ You are outside the branch area!");
+    }
+
+    const existing = await getDocs(attQuery);
+    if (!existing.empty) {
+      loader.style.display = "none";
+      return alert("⚠️ Already Checked In Today!");
+    }
+
+    await addDoc(collection(db, "attendance"), {
+      userId: currentUser.id,
+      username: currentUser.username,
+      branchId: currentUser.branchId,
+      branchName: branch.name,
+      time: serverTimestamp(),
+      dateStr: todayStr,
+      location: { lat: latitude, lng: longitude, distance }
+    });
+
+    loader.style.display = "none";
+    alert("✅ Checked In Successfully!");
+    inTimeEl.textContent = new Date().toLocaleString();
+
+    // enable checkout, break
+    checkoutBtn.disabled = false;
+    brkoutBtn.disabled = false;
+  });
+};
+
+// ---------------------- CHECK-OUT ----------------------
+checkoutBtn.onclick = async () => {
+  if (!attRef) return alert("⚠️ You must Check In first!");
+  if (attData?.checkoutTime) return alert("✅ Already Checked Out!");
+
+  const confirmOut = confirm("Do you really want to Check Out?");
+  if (!confirmOut) return;
+
+  await updateDoc(attRef, { checkoutTime: serverTimestamp() });
+  outTimeEl.textContent = new Date().toLocaleString();
+  alert("✅ Checked Out!");
+  checkoutBtn.disabled = true;
+  brkoutBtn.disabled = true;
+};
+
+// ---------------------- BREAK-OUT ----------------------
+brkoutBtn.onclick = async () => {
+  if (!attRef) return alert("⚠️ You must Check In first!");
+  if (attData?.breakOutTime) return alert("⚠️ You already took a break!");
+
+  const purpose = prompt("Enter break purpose:");
+  if (!purpose) return;
+
+  loader.style.display = "flex";
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const { latitude, longitude } = pos.coords;
+    const distance = getDistance(latitude, longitude, branch.lat, branch.lng);
+    if (distance > branch.radius_m && currentUser.role !== "admin") {
+      loader.style.display = "none";
+      return alert("❌ Outside branch area!");
+    }
+
+    await updateDoc(attRef, {
+      breakOutTime: serverTimestamp(),
+      breakPurpose: purpose
+    });
+
+    loader.style.display = "none";
+    breakOutTimeEl.textContent = new Date().toLocaleString();
+    breakPurposeEl.textContent = purpose;
+    alert("☕ Break Out Recorded!");
+    brkoutBtn.disabled = true;
+    brkinBtn.disabled = false;
+  });
+};
+
+// ---------------------- BREAK-IN ----------------------
+brkinBtn.onclick = async () => {
+  if (!attRef) return alert("⚠️ Check In first!");
+  if (!attData?.breakOutTime) return alert("⚠️ You haven't done Break Out!");
+  if (attData?.breakInTime) return alert("✅ Already Break In done!");
+
+  await updateDoc(attRef, { breakInTime: serverTimestamp() });
+  breakInTimeEl.textContent = new Date().toLocaleString();
+  alert("✅ Break In Done!");
+  brkinBtn.disabled = true;
+};
+
+// ---------------------- Disable Buttons Initially ----------------------
+if (!attData) {
+  checkoutBtn.disabled = true;
+  brkoutBtn.disabled = true;
+  brkinBtn.disabled = true;
+} else {
+  if (attData.checkoutTime) {
+    checkoutBtn.disabled = true;
+    brkoutBtn.disabled = true;
+    brkinBtn.disabled = true;
+  } else {
+    checkoutBtn.disabled = false;
+    brkoutBtn.disabled = !attData.time;
+    brkinBtn.disabled = !attData.breakOutTime;
+  }
+}
+// sign out
+document.getElementById("signOutBtn").addEventListener("click", () => {
+  localStorage.removeItem("loggedUser");
+  window.location.href = "./";
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,27 @@
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  padding: 15px;
+  margin-top: 10px;
+   display: flex;
+   justify-content: space-between;
+}
+.card .attendance{
+    display: block;
+    justify-items: flex-start;
+    align-items: flex-start;
+}
+.card-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+.card-body p img {
+  height: 20px;
+  background: #f0f0f0;
+  border-radius: 50%;
+  padding: 5px;
+  box-shadow: 0 0 4px rgba(0,0,0,0.15);
+}

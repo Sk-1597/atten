@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>History</title>
+  <link rel="stylesheet" href="./resources/css/main.css">
+  <link rel="stylesheet" href="./resources/css/history.css">
+</head>
+ <body class="attendance-page">
+
+  <header class="topbar">
+    <div class="user-info">
+      <img src="./resources/icons/user.png" class="user-icon" alt="User">   
+    </div>
+    <div class="top-icons">
+  <a href="./attendance.html">
+    <img src="./resources/icons/home.png" alt="Report" class="icon-btn">
+  </a>
+  <button id="signOutBtn" class="signout-btn">
+    <img src="./resources/icons/logout.png" alt="Logout" class="icon-btn">
+  </button>
+</div>
+  </header>
+
+  <main class="content" style="padding: 20px;">
+
+    <div class="user_info" style="display: flex; justify-content: start; align-items: center; gap: 10px;">
+      <img src="./resources/icons/user.png" alt="" srcset="" style="height:50px; background-color: #eb0000; border-radius: 50%; padding: 10px;">
+      <div class="user_email" style="display: flex; flex-direction: column; justify-content: center; align-items: start; ">
+        <p id="userName" class="user" style="font-size: 20px; font-weight: bold; margin: 2px 0;">Loading...</p>
+        <p id="email" class="email" style="font-size: 15px; font-weight: bold; margin: 2px 0;">example@gmail.com</p>
+      </div> 
+    </div>
+
+<div class="filter_feld" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 30px;">
+  <div class="inputBox" style="gap: 5px; display: flex; flex-direction: row; align-items: center;">
+    <label for="fromDate"><img src="./resources/icons/filter.png" alt="" srcset="" style="height: 18px;"></label>
+    <input type="date" id="fromDate">
+  </div>
+  <div class="inputBox" style="gap: 5px; display: flex; flex-direction: row; align-items: center;">
+    <label for="toDate">To :</label>
+    <input type="date" id="toDate">
+  </div>
+  <div class="btn-apply">
+    <button id="apply">Apply</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="attendance">
+<div class="card-header">
+      <h3>Attendance</h3>
+    </div>
+    <div class="card-body">
+      <p class="branch"><img src="./resources/icons/location.png"><span id="branchSelect"></span></p>
+      <p><img src="./resources/icons/checkin.png"><span id="inTime">--</span></p>
+      <p><img src="./resources/icons/checkout.png"><span id="outTime">--</span></p>
+    </div>
+  </div>
+
+  <div class="breake">
+    <div class="card-header">
+      <h3>Breake Time</h3>
+    </div>
+    <div class="card-body">
+      <p><img src="./resources/icons/checkin.png"><span id="inTime">--</span></p>
+      <p><img src="./resources/icons/checkout.png"><span id="outTime">--</span></p>      
+      <p><img src="./resources/icons/purpose.png"><span>--</span></p>
+    </div>
+    </div>
+  </div>
+
+  </main>
+
+
+  <script type="module">
+  import { db } from './firebase.js';
+  import { getDoc, doc, addDoc, collection, getDocs, query, where, serverTimestamp } 
+    from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+  const currentUser = JSON.parse(localStorage.getItem("loggedUser"));
+  if (!currentUser) {
+    window.location.href = "index.html";
+  }
+  userName.textContent = currentUser.user;
+  email.textContent = currentUser.username;
+</script>
+
+ </body>
+</html>

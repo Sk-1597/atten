@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+body {
+  margin: 0;
+  font-family: "Open Sans", sans-serif;
+   font-variation-settings: "wdth" 100;
+   font-optical-sizing: auto;
+  background: #ebebebef;
+  color: #222;
+}
+
+header.topbar {
+  background: #b40000;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  position: sticky;
+  top: 0;
+}
+.user-info img {
+  width: 30px;
+  height: 30px;
+  padding: 2px;
+}
+.top-icons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.icon-btn {
+  width: 28px;
+  height: 28px;
+}
+
+.signout-btn{
+  background:none;
+  border: none;
+} 

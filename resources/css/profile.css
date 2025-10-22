@@ -1,0 +1,51 @@
+
+.main-cont {
+    display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 25px;
+  max-height: 90vh;
+}
+.profile-logo{
+  padding: 50px 50px;
+  width: 100%;
+  max-width: 380px;
+  height: 70vh;
+  text-align: center;
+}
+.logo-circle {
+  width: 110px;
+  height: 110px;
+  background: #bbbbbb;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;  
+  margin: 0 auto 10px;
+}
+.user-detl{
+    display: flex;
+    flex-direction: column; 
+    justify-content: center;
+    align-items: start;
+}
+
+.user-detl p{
+    font-size: 18px;
+    font-weight: bold;
+    padding: 8px;
+}
+.user-detl p span{
+    font-size: 20px;
+    text-transform: uppercase;
+}
+
+
+
+.content {
+  padding: 1px;
+}
+
+.logo-circle img {
+    height: 70px;
+}
