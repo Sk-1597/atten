@@ -1,33 +1,3 @@
-/*  
-  // 🧾 Submit Leave Request
-  document.getElementById('leaveForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const fromDate = document.getElementById('fromDate').value;
-    const toDate = document.getElementById('toDate').value;
-    const leaveDuration = document.getElementById('leaveDuration').value;
-    const reason = document.getElementById('reason').value;
-
-    if (!fromDate || !toDate || !reason || !leaveDuration ) {
-      alert("Please fill all fields");
-      return;
-    }
-
-    await addDoc(collection(db, "leaveRequests"), {
-      userId,
-      fromDate,
-      toDate,
-      reason,
-      leaveType:"",
-      leaveDuration,
-      status: "Pending",
-      createdAt: new Date().toISOString()
-    });
-
-    msg.textContent = "✅ Leave request submitted successfully!";
-    document.getElementById('leaveForm').reset();
-    setTimeout(() => msg.textContent = "", 3000);   
-  });
-*/
 
 import { db, collection, query, where, getDocs } from "./database.js";
 import { loader, currentUser } from "./utils/loggeduser.js";
@@ -65,20 +35,40 @@ async function loadLeaves() {
       const from = new Date(d.fromDate);
       const to = new Date(d.toDate);
 
-      let days = (to - from) / (1000 * 60 * 60 * 24) + 1;
-      if (d.leaveDuration === "half") days = 0.5;
+      // 🔹 Normalize time (avoid timezone bugs)
+      from.setHours(0, 0, 0, 0);
+      to.setHours(0, 0, 0, 0);
 
-      // 🔹 Count monthly/yearly stats
-      for (let dt = new Date(from); dt <= to; dt.setDate(dt.getDate() + 1)) {
-        if (dt.getFullYear() === year) {
-          stats[type].year++;
-          if (dt.getMonth() + 1 === month) {
-            stats[type].month++;
+      // 🔹 Calculate leave days
+      let days = Math.round((to - from) / (1000 * 60 * 60 * 24)) + 1;
+
+      // 🔹 Half-day correction
+      if (d.leaveDuration?.toLowerCase() === "half") {
+        days = 0.5;
+      }
+
+      // 🔹 Add to yearly/monthly stats
+      if (d.leaveDuration?.toLowerCase() === "half") {
+        // Count only half
+        if (from.getFullYear() === year) {
+          stats[type].year += 0.5;
+          if (from.getMonth() + 1 === month) {
+            stats[type].month += 0.5;
+          }
+        }
+      } else {
+        // Full-day or multiple days
+        for (let dt = new Date(from); dt <= to; dt.setDate(dt.getDate() + 1)) {
+          if (dt.getFullYear() === year) {
+            stats[type].year++;
+            if (dt.getMonth() + 1 === month) {
+              stats[type].month++;
+            }
           }
         }
       }
 
-      // 🔹 Add row
+      // 🔹 Add row to table
       allRows.push(`
         <tr>
           <td>${formatDate(from)}</td>
@@ -90,7 +80,7 @@ async function loadLeaves() {
     });
   }
 
-  // ✅ Sort rows by date
+  // ✅ Sort rows by "From" date
   allRows.sort((a, b) => {
     const dateA = new Date(a.match(/\d{2}\/\d{2}\/\d{4}/)[0].split("/").reverse().join("-"));
     const dateB = new Date(b.match(/\d{2}\/\d{2}\/\d{4}/)[0].split("/").reverse().join("-"));
@@ -134,4 +124,3 @@ loadLeaves();
 document.getElementById("Close").addEventListener("click", () => {
   document.getElementById("popupLeave").style.display = "none";
 });
-
