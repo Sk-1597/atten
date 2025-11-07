@@ -1,0 +1,114 @@
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .popup h3 {
+    margin-top: 0;
+    font-size: 20px;
+    font-weight: 900;
+  }
+
+  .popup p {
+    font-size: 14px;
+    color: #555;
+    margin-top: -10px;
+    margin-bottom: 12px;
+  }
+
+  .inputBox {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
+    padding: 25px;   
+    gap: 12px;
+  }
+ 
+  input{
+    height: 15px;
+  }
+  
+  select, input[type="text"],input[type="date"] {
+    width: 65%;
+    padding: 10px;
+    border: none;
+    border-bottom: 1px solid #e60606;
+    font-size: 15px;
+    background-color:rgba(219, 219, 219, 0.507);
+  }
+
+  .popup-buttons {
+    margin-top: 16px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .confirm {
+    background: #007bff;
+    color: white;
+  }
+
+  .cancel {
+    background: #ddd;
+  }
+
+
+/* Style date input */
+
+
+
+
+  /* ✅ Mobile Friendly Design */
+  @media (max-width: 600px) {
+    .popup {
+      width: 100%;
+      padding: 15px;
+    }
+    select, input {
+      font-size: 14px;
+      padding: 20px;
+    }
+    .popup h3 { font-size: 18px; }
+  }
+
+         body {
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    background: #f0f2f5;
+  }
+
+
+  const applyBtn = document.getElementById("alyLeav");
+const cancelBtn = document.getElementById("cslLeav");
+const leavePopup = document.getElementById("leavePopup");
+
+// 👇 Apply ബട്ടൺ അമർത്തുമ്പോൾ popup കാണിക്കുക
+applyBtn.addEventListener("click", () => {
+  leavePopup.style.display = "flex";
+});
+
+// 👇 Cancel ബട്ടൺ അമർത്തുമ്പോൾ popup അടയ്ക്കുക
+cancelBtn.addEventListener("click", () => {
+  leavePopup.style.display = "none";
+});
+
+
+document.getElementById("CancelAplitn").addEventListener("click", () => {
+  leavePopup.style.display = "none";
+});
+
+
+<div class="heading" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+        <h3>Personal Details</h3>
+         <button id="update" style="background: none; border: none; font-size: 20px; font-weight: 800; text-decoration-line: underline; color: rgba(0, 0, 255, 0.514); padding: 7px; border-radius: 10px; margin-top: 19px;">Edit</button>
+        </div>

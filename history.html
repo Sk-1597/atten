@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Record</title>
+    <link rel="stylesheet" href="./assets/css/main.css">
+    <link rel="stylesheet" href="./assets/css/perfom.css">
+  </head>
+  <body>
+<!------------top bar & side menu----------->
+ <div id="navbar-container"></div>
+<!---------------------------------------->   
+<main class="content">
+  <div class="pageTitle">
+    <h2 id="pageTitle">Attendance Record</h2>
+  </div>
+  <div class="search-row">
+    <div class="atten-filter">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search Date.">
+    </div>
+    <div class="button-attn">     
+      <select id="sectionSelect" class="section-selector">       
+        <option value="attendance">Attendance</option>
+        <option value="Brake">Brake Out</option>
+      </select>
+    </div>
+  </div>
+  <div class="section-block">
+      <div class="table-scroll">
+        <div id="attnHistoryBody"></div>
+      </div>
+    </div>  
+<script type="module" src="./assets/js/history.js"></script>
+<script type="module" src="./assets/js/utils/topbar.js"></script>
+</main>
+  </body>
+</html>

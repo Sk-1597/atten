@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance</title>
+    <link rel="stylesheet" href="./assets/css/main.css">
+    <link rel="stylesheet" href="./assets/css/perfom.css">
+  </head>
+  <body>
+
+    <!---------------top bar and side menu----------------------------------------->
+ <div id="navbar-container"></div>
+<!---------------top bar and side menu----------------------------------------->
+   
+
+<main class="content">
+  <div class="pageTitle">
+    <h2 id="pageTitle">Performance</h2>
+  </div>
+  <div class="search-row">
+    <div class="atten-filter">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search Number...">
+      <select id="sectionSelect" class="section-selector">
+        <option value="fd" selected>Deposits</option>
+        <option value="rd">R D</option>
+        <option value="chitty">Chitty</option>
+      </select>
+    </div>
+    <div class="button-attn">
+      <button id="addRecordBtn">Add Record</button>
+    </div>
+  </div>
+  <div class="table-container" id="tab-section-Out"> </div>
+
+<!--- popup ------------------->
+  <!--- deposti popupn ------------->
+    <div class="popup-overlay Deposits" id="popupDeposits">
+    <div class="popup-box">
+      <div class="title">
+      <h3 id="popupTitle">Add Deposits</h3></div>
+      <form id="popupForm">
+          <div class="inputFilds">
+        <input type="hidden" id="recordId">
+
+          <div class="inputBox">
+          <label for="By">Deposit by</label>
+        <select  name="By" required>
+          <option disable selection></option>
+          <option value="self">Self</option>
+          <option value="public">Public</option>
+        </select>
+        </div>
+
+        <div class="inputBox">
+          <label for="type">Deposit Type</label>
+        <select  name="type" id="type" required>
+          <option disable selection></option>
+          <option value="ncd">NCD</option>
+          <option value="f d">Fixed Diposits</option>
+        </select>
+        </div> 
+        <div class="inputBox">
+          <label for="number">Number</label>
+           <input type="text" name="number" placeholder="Deposit Number" required>
+        </div>
+       <div class="inputBox">
+        <label for="name">Name</label>
+        <input type="text" name="name" placeholder="Customer Name" required>
+       </div>        
+       <div class="inputBox">
+        <label for="startDt">Open Date</label>
+        <input type="date" name="startDt" required>
+       </div>
+       <div class="inputBox">
+        <label for="end">Maturity Date</label>
+         <input type="date" name="end" required>
+       </div>
+       <div class="inputBox">
+        <label for="amount">Amount</label>
+        <input type="number" name="amount" placeholder="Amount (₹)" required>
+       </div>
+        </div>
+        <div class="btns">
+          <button type="button" class="cancel-btn">Cancel</button>
+        <button type="button" class="save-btn" data-section="fd">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+ <!--- Rd popup ------------->
+    <div class="popup-overlay Rd" id="popupRd">
+    <div class="popup-box">
+      <div class="title">
+      <h3 id="popupTitle"> Add Recurring deposit</h3></div>
+      <form id="popupForm">
+          <div class="inputFilds">
+            <input type="hidden" name="type" value="rd">
+        <input type="hidden" name="recordId"> 
+
+         <div class="inputBox">
+          <label for="By">RD By</label>
+        <select  name="By" id="By" required>
+          <option disable selection></option>
+          <option value="self">Self</option>
+          <option value="public">Public</option>
+        </select>
+        </div>   
+
+        <div class="inputBox">
+          <label for="number">Number</label>
+           <input type="text" name="number" placeholder="R D Number" required>
+        </div>
+       <div class="inputBox">
+        <label for="name">Name</label>
+        <input type="text" name="name" placeholder="Customer Name" required>
+       </div>        
+       <div class="inputBox">
+        <label for="startDt">Open Date</label>
+        <input type="date" name="startDt" required>
+       </div>
+       <div class="inputBox">
+        <label for="end">Maturity Date</label>
+         <input type="date" name="end" required>
+       </div>
+       <div class="inputBox">
+        <label for="amount">Instalment Amount</label>
+        <input type="number" name="amount" placeholder="Amount (₹)" required>
+       </div>
+        </div>
+        <div class="btns">
+          <button type="button" class="cancel-btn">Cancel</button>
+        <button type="button" class="save-btn" data-section="rd">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!--- Chitty popup ------------->
+    <div class="popup-overlay Rd" id="popupChitty">
+    <div class="popup-box">
+      <div class="title">
+      <h3 id="popupTitle"> Add Chitty</h3></div>
+      <form id="popupForm">
+          <div class="inputFilds">
+            <input type="hidden" name="type" value="Chity">
+
+        <input type="hidden" id="recordId">  
+         <div class="inputBox">
+          <label for="By">Chitty by</label>
+        <select  name="By" id="By" required>
+          <option disable selection></option>
+          <option value="self">Self</option>
+          <option value="public">Public</option>
+        </select>
+        </div>      
+        <div class="inputBox">
+          <label for="number">Number</label>
+           <input type="text" name="number" placeholder="chitty Number" required>
+        </div>
+       <div class="inputBox">
+        <label for="name">Name</label>
+        <input type="text" name="name" placeholder="Customer Name" required>
+       </div>        
+       <div class="inputBox">
+        <label for="startDt">Open Date</label>
+        <input type="date" name="startDt" required>
+       </div>
+       <div class="inputBox">
+        <label for="end">Duration</label>
+         <input type="number" name="end" required>
+       </div>
+       <div class="inputBox">
+        <label for="amount">Instalment Amount</label>
+        <input type="number" name="amount" placeholder="Amount (₹)" required>
+       </div>
+        </div>
+        <div class="btns">
+          <button type="button" class="cancel-btn">Cancel</button>
+        <button type="button" class="save-btn" data-section="chitty">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>  
+ 
+
+<script type="module" src="./assets/js/perform.js"></script>
+<script type="module" src="./assets/js/utils/topbar.js"></script>
+</body>
+</html>
