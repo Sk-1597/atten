@@ -3,58 +3,133 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Attendance</title>
-  <link rel="stylesheet" href="./resources/css/profile.css">
-  <link rel="stylesheet" href="./resources/css/main.css">
+  <title>Profile</title>
+  <link rel="stylesheet" href="./assets/css/profile.css">
+  <link rel="stylesheet" href="./assets/css/main.css">
 </head>
  <body class="attendance-page">
 
-  <header class="topbar">
-    <div class="user-info">
-      <img src="./resources/icons/user.png" class="user-icon" alt="User">   
+ <!---------------top bar and side menu----------------------------------------->
+ <div id="navbar-container"></div>
+<!---------------top bar and side menu----------------------------------------->
+
+<div class="main-cont">
+  <div class="userFilter-feld" >
+    <div class="user_info">
+      <img src="./assets/icons/user.png" alt="">
+      <div class="user_email">
+        <p id="userName" class="user">Loading...</p>
+        <p id="email" class="email"></p>
+      </div>
     </div>
-    <div class="top-icons">
-  <a href="./attendance.html">
-    <img src="./resources/icons/home.png" alt="Report" class="icon-btn">
-  </a>
-  <button id="signOutBtn" class="signout-btn">
-    <img src="./resources/icons/logout.png" alt="Logout" class="icon-btn">
-  </button>
-</div>
-  </header>
-  <div class="main-cont">
-  <div class="profile-logo">
-      <div class="logo-circle"><img src="./resources/icons/user.png" alt="artlogo" srcset=""></div>
-        <div class="usernme" style="font-weight: 800; font-size: 22px; text-transform: uppercase;"><p id="userName"></p></div>
-        
-    
-  <div class="user-detl">    
-    <p>✉️ 
-      Email :<span id="email"></span></p>
-    <p>📞 Mobile :<span id="Mobile"></span></p>    
-    <p>📅 Join Date:<span id="jDate"></span></p>
-    <p>🪪 Employe Code:<span id="eCode"></span></p>
-    <p>🏠 Address:<br><span id="address"></span></p> 
-</div>
-</div>
-</div>
-      <script type="module">
-  import { db } from './firebase.js';
-  import { getDoc, doc, addDoc, collection, getDocs, query, where, serverTimestamp } 
-    from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
-  const currentUser = JSON.parse(localStorage.getItem("loggedUser"));
-  if (!currentUser) {
-    window.location.href = "index.html";
-  }
+  <div class="user-detl">
+    <div class="personal-detl">
+      <div class="heading" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+        <h3>Personal Details</h3>
+         <button id="update" style="background: none; border: none; font-size: 20px; font-weight: 800; text-decoration-line: underline; color: rgba(0, 0, 255, 0.514); padding: 7px; border-radius: 10px; margin-top: 19px;">Edit</button>
+        </div>
+    <div class="detlBox">
+        <img src="./assets/icons/dob.png" alt="" srcset="">
+        <p><span id="dob">-</span></p>
+      </div>    
+     <div class="detlBox">
+        <img src="./assets/icons/mobil.png" alt="" srcset="">
+        <p><span id="Mobile">-</span></p>
+      </div>
+      <div class="detlBox">
+        <img src="./assets/icons/addres.png" alt="" srcset="">
+        <p><span id="address">-</span></p>
+      </div>
+      <div class="detlBox">
+        <img src="./assets/icons/id-card.png" alt="" srcset="">
+        <p style="gap: 3px;"><span id="details"></span> <span>(AADHAAR)</span></p>
+      </div>
+      <div class="detlBox">
+        <img src="./assets/icons/bank.png" alt="" srcset="">
+        <p style="gap: 10px;"><span id="bank">-</span>(<span id="banknum"></span>)</p>
+      </div>
+    </div>
 
-  userName.textContent = currentUser.user;
-  email.textContent = currentUser.username;
-  Mobile.textContent = currentUser.mobile;
-  jDate.textContent = currentUser.jDate;
-  eCode.textContent = currentUser.eCode;
-  address.textContent = currentUser.address;
-  
+<div class="Staff-detl">
+      <h3>Staff Details</h3>
+    <div class="detlBox">
+      <img src="./assets/icons/group.png" alt="" srcset="" >
+       <p><span id="group">Chengannur Nidhi Limited</span></p>
+      </div>
+      <div class="detlBox">
+        <img src="./assets/icons/employe.png" alt="" srcset="" >
+        <p><span id="eCode">-</span></p>
+      </div>
+      <div class="detlBox">
+        <img src="./assets/icons/join.png" alt="" srcset="">
+        <p><span id="jDate">-</span></p>
+      </div>
+      <div class="detlBox">
+        <img src="./assets/icons/designation.png" alt="" srcset="">
+        <p><span id="designation">-</span></p>
+      </div>
+</div>    
+    </div>
+  </div>
+</div>
+
+<!-----personal Details popup---->
+<div id="PersonalPopup" class="popup-overlay-Personal">
+    <div class="Personal-popup">
+      <div class="title">
+        <h3>Update Personal Details</h3>
+        <p id="status"></p>
+      </div>
+      <div class="inputFields">
+        <div class="inputBox">
+          <label for="dobIn">Date of Birth :</label>
+          <input type="date" id="dobIn" placeholder="Date of Birth">
+        </div>
+        <div class="inputBox">
+          <label for="mobileIn">Phone :</label>
+          <input type="number" id="mobileIn" placeholder="Phone Number" autocomplete="off">
+        </div>
+        <div class="inputBox">
+          <label for="addressIn">Address :</label>
+          <input type="text" id="addressIn" placeholder="Full Address" autocomplete="off">
+        </div>
+        <div class="inputBox">
+          <label for="iddetailsIn">Aadhaar :</label>
+          <input type="number" id="iddetailsIn" placeholder="Aadhaar Number" autocomplete="off">
+        </div>
+        <div class="inputBox bank">
+          <label for="bankIn">Bank Details :</label>
+          <div class="bankInputs">
+            <input type="text" id="bankIn" placeholder="Bank Name" autocomplete="off">
+            <input type="number" id="banknumIn" placeholder="Account Number" autocomplete="off">
+          </div>
+        </div>
+      </div>
+      <div class="Personal-popup-buttons">
+        <button id="updateDtl" class="btn update">Update</button>
+        <button id="CancelDtl" class="btn cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+<script type="module" src="./assets/js/utils/topbar.js"></script>
+<script type="module" src="./assets/js/profile.js"></script>
+
+ <script>
+const updateBtn = document.getElementById("update");
+const cancelBtn = document.getElementById("CancelDtl");
+const leavePopup = document.getElementById("PersonalPopup");
+
+updateBtn.addEventListener("click", () => {
+  PersonalPopup.style.display = "flex";
+});
+
+cancelBtn.addEventListener("click", () => {
+  PersonalPopup.style.display = "none";
+});
+
 </script>
+
 </body>
 </html>

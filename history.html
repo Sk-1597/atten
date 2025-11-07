@@ -4,146 +4,49 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>History</title>
-  <link rel="stylesheet" href="./resources/css/main.css">
-  <link rel="stylesheet" href="./resources/css/history.css">
+  <link rel="stylesheet" href="./assets/css/main.css">
+  <link rel="stylesheet" href="./assets/css/history.css">
 </head>
  <body class="attendance-page">
+ 
+   <!---------------top bar and side menu----------------------------------------->
+ <div id="navbar-container"></div>
+<!---------------top bar and side menu----------------------------------------->
 
-  <header class="topbar">
-    <div class="user-info">
-      <img src="./resources/icons/user.png" class="user-icon" alt="User">   
-    </div>
-    <div class="top-icons">
-  <a href="./attendance.html">
-    <img src="./resources/icons/home.png" alt="Report" class="icon-btn">
-  </a>
-  <button id="signOutBtn" class="signout-btn">
-    <img src="./resources/icons/logout.png" alt="Logout" class="icon-btn">
-  </button>
-</div>
-  </header>
-
-  <main class="content" style="padding: 20px;">
-
-    <div class="user_info" style="display: flex; justify-content: start; align-items: center; gap: 10px;">
-      <img src="./resources/icons/user.png" alt="" srcset="" style="height:50px; background-color: #eb0000; border-radius: 50%; padding: 10px;">
-      <div class="user_email" style="display: flex; flex-direction: column; justify-content: center; align-items: start; ">
-        <p id="userName" class="user" style="font-size: 20px; font-weight: bold; margin: 2px 0;">Loading...</p>
-        <p id="email" class="email" style="font-size: 15px; font-weight: bold; margin: 2px 0;">example@gmail.com</p>
-      </div> 
-    </div>
-
-<div class="filter_feld" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 30px;">
-  <div class="inputBox" style="gap: 5px; display: flex; flex-direction: row; align-items: center;">
-    <label for="fromDate"><img src="./resources/icons/filter.png" alt="" srcset="" style="height: 18px;"></label>
-    <input type="date" id="fromDate" >
-  </div>
-  <div class="inputBox" style="gap: 5px; display: flex; flex-direction: row; align-items: center; gap: 5px;">
-    <label for="toDate" style="font-weight: 600;">To :</label>
-    <input type="date" id="toDate">
-  </div>
-  <div class="btn-apply">
-    <button id="apply">Apply</button>
-  </div>
-</div>
-<div id="historyContainer" class="history-list"></div>
-<!--<div class="card">
-  <div class="attendance">
-<div class="card-header">
-      <h3>Attendance</h3>
-    </div>
-    <div class="card-body">
-      <p class="branch"><img src="./resources/icons/location.png"><span id="branchSelect"></span></p>
-      <p><img src="./resources/icons/checkin.png"><span id="inTime">--</span></p>
-      <p><img src="./resources/icons/checkout.png"><span id="outTime">--</span></p>
+  <main class="content">
+    <div class="userFilter-feld" >
+  <div class="user_info">
+    <img src="./assets/icons/user.png" alt="">
+    <div class="user_email">
+      <p id="userName" class="his-user">Loading...</p>
+      <p id="email" class="his-email"></p>
     </div>
   </div>
 
-  <div class="breake">
-    <div class="card-header">
-      <h3>Breake Time</h3>
+  <div class="filter_feld" >
+    <div class="inputBox">
+      <label for="fromDate">
+        <img src="./assets/icons/filter.png" style="height: 18px;">
+      </label>
+      <input type="date" id="fromDate">
     </div>
-    <div class="card-body">
-      <p><img src="./resources/icons/checkin.png"><span id="inTime">--</span></p>
-      <p><img src="./resources/icons/checkout.png"><span id="outTime">--</span></p>      
-      <p><img src="./resources/icons/purpose.png"><span id="breakPurpose">--</span>
-    </p>
+    <div class="inputBox">
+      <label for="toDate" style="font-weight: 600;">To :</label>
+      <input type="date" id="toDate">
     </div>
+    <div class="btn-apply">
+      <button id="apply">Apply</button>
     </div>
-  </div>-->
-  </main>
+  </div>
+  </div>
 
+  <div id="historyContainer" class="history-list">
+    <!-- History data here -->
+  </div>
+</main>
 
-  <script type="module">
-import { db } from './firebase.js';
-import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
-
-const currentUser = JSON.parse(localStorage.getItem("loggedUser"));
-if(!currentUser) window.location.href = "./";
-
-userName.textContent = currentUser.user;
-  email.textContent = currentUser.username;
-
-const historyContainer = document.getElementById("historyContainer");
-
-// date format function
-function formatDateTime(timestamp) {
-  const d = timestamp instanceof Date ? timestamp : timestamp.toDate();
-  const day = String(d.getDate()).padStart(2,'0');
-  const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  const month = monthNames[d.getMonth()];
-  const year = d.getFullYear();
-  let hours = d.getHours();
-  const minutes = String(d.getMinutes()).padStart(2,'0');
-  const seconds = String(d.getSeconds()).padStart(2,'0');
-  const ampm = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12 || 12;
-  return `${day} ${month} ${year} : ${String(hours).padStart(2,'0')}:${minutes}:${seconds} ${ampm}`;
-}
-
-async function loadHistory() {
-  const attQuery = query(collection(db, "attendance"), where("userId", "==", currentUser.id));
-  const attSnap = await getDocs(attQuery);
-
-  historyContainer.innerHTML = ''; // clear old
-
-  attSnap.forEach(docSnap => {
-    const data = docSnap.data();
-
-    const card = document.createElement('div');
-    card.className = 'card history-card';
-    card.innerHTML = `
-      <div class="attendance">
-        <div class="card-header"><h3>${data.dateStr}</h3></div>
-        <div class="card-body">
-          <p class="branch_nme"><img src="./resources/icons/location.png"><span>${data.branchName}</span></p>
-          <p><img src="./resources/icons/checkin.png"><span>${data.time ? formatDateTime(data.time) : '--'}</span></p>
-          <p><img src="./resources/icons/checkout.png"><span>${data.outTime ? formatDateTime(data.outTime) : '--'}</span></p>
-        </div>
-      </div>
-      <div class="breake">
-        <div class="card-header"><h3>Break Time</h3></div>
-        <div class="card-body">
-          <p><img src="./resources/icons/checkin.png"><span>${data.breakInTime ? formatDateTime(data.breakInTime) : '--'}</span></p>
-          <p><img src="./resources/icons/checkout.png"><span>${data.breakOutTime ? formatDateTime(data.breakOutTime) : '--'}</span></p>
-          <p><img src="./resources/icons/purpose.png"><span> ${data.breakPurpose || '--'}</span></p>
-        </div>
-      </div>
-    `;
-
-    historyContainer.appendChild(card);
-  });
-}
-// initial load
-loadHistory();
-
-// ---------------- SIGN OUT ----------------
-document.getElementById("signOutBtn").addEventListener("click", () => {
-  localStorage.removeItem("loggedUser");
-  window.location.href = "./";
-});
-</script>
-
+<script type="module" src="./assets/js/utils/topbar.js"></script>
+<script type="module" src="./assets/js/history.js"></script>
 
  </body>
 </html>

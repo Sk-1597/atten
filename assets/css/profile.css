@@ -1,0 +1,208 @@
+.main-cont {
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+   height: 60vh;
+}
+.userFilter-feld {
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
+}
+.user_info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+}
+.user_info img {
+  height: 50px;
+  width: 50px;
+  background-color: #b40000;
+  border-radius: 50%;
+  padding: 8px;
+  flex-shrink: 0;
+}
+.user_email {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.user {
+  font-size: 22px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 0;
+}
+.email {
+  font-size: 16px;
+  color: #555;
+  margin: 0;
+}
+.user-detl {  
+  padding: 10px;
+  gap: 25px;
+}
+.personal-detl,
+.Staff-detl{
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+.personal-detl h3,
+.Staff-detl h3 {
+  margin-bottom: 0;
+  font-size: 20px; 
+  font-weight: bold;
+  text-decoration: underline;
+}
+.detlBox{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+.user-detl .detlBox img {
+  width: 25px; height: 25px; flex-shrink: 0; margin-top: 2px; padding: 4px; background-color: #b40000;border-radius: 50px;
+}
+.detlBox p {
+  display: flex;
+  align-items: start; 
+  gap: 30px;
+  padding: 6px;
+  font-size: 17px;
+  text-transform: capitalize;
+  font-weight: bold;
+}
+.user-detl span {
+  word-break: break-word;
+  text-transform: uppercase;
+  font-weight: 800;
+  font-size: 15px;
+}
+
+
+/*----popup---*/
+.popup-overlay-Personal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  display: none; 
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+.Personal-popup {
+  background: #fff;
+  padding: 25px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  text-align: start;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
+  font-family: "Lato", sans-serif;
+}
+.title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.Personal-popup h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #034da1;
+}
+.inputFields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inputBox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inputBox.bank {
+  flex-direction: column;
+}
+
+.bankInputs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+input{
+  width: 100%;
+  height: 40px;
+  border: none;
+  outline: none;
+  background-color: #f1f1f1c9;
+  border-bottom: 2px solid #920606;
+  font-weight: 500;
+  font-size: 16px;
+  text-transform: uppercase;
+  border-radius: 6px 6px 0 0;
+  padding: 8px;
+}
+
+label {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.Personal-popup input::placeholder {
+  text-transform: capitalize;
+  color: #5555555d;
+}
+
+.Personal-popup-buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.Personal-popup-buttons .btn {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.update {
+  background: #010f88;
+}
+
+.update:hover {
+  background: #0721b1;
+}
+
+.cancel {
+  background: #8b0000;
+}
+
+.cancel:hover {
+  background: #a31616;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

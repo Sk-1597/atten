@@ -4,80 +4,84 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Attendance</title>
-<link rel="stylesheet" href="./resources/css/atten.css">
-<link rel="stylesheet" href="./resources/css/main.css">
-<style>
-
-</style>
+<link rel="stylesheet" href="./assets/css/atten.css">
+<link rel="stylesheet" href="./assets/css/main.css">
 </head>
-<body class="attendance-page">
+<body>
+  
+  <!---------------top bar and side menu----------------------------------------->
+ <div id="navbar-container"></div>
+<!---------------top bar and side menu----------------------------------------->
 
-<header class="topbar">
-  <div class="user-info">
-    <a href="./profile.html">
-      <img src="./resources/icons/user.png" alt="User">
-    </a>
-  </div>
-  <div class="top-icons">
-    <a href="./history.html">
-      <img src="./resources/icons/history.png" alt="Report" class="icon-btn">
-    </a>
-    <button id="signOutBtn" class="signout-btn">
-      <img src="./resources/icons/logout.png" alt="Logout" class="icon-btn">
-    </button>
-  </div>
-</header>
 
 <main class="content">
-  <p class="welcome-text">Welcome,</p>
+  <p class="welcome-text">Hello,</p>
   <h2 id="userName">Loading...</h2>
 
+<!---Today Attendance-->
   <section class="card">
     <div class="card-header">
       <h3>Today Attendance</h3>
       <div class="check-bttn">
-        <button id="markBtn" class="btn checkin">Check In</button>
-        <br>
+        <button id="markBtn" class="btn checkin">Check In</button><br>
         <button id="checkout" class="btn checkout">Check Out</button>
       </div>
     </div>
     <div class="card-body blue">
-      <p class="branch"><img src="./resources/icons/location.png"><span id="branchSelect"></span></p>
-      <p><img src="./resources/icons/checkin.png"><span id="inTime">--</span></p>
-      <p><img src="./resources/icons/checkout.png"><span id="outTime">--</span></p>
+      <p class="branch"><img src="./assets/icons/location.png"><span id="branchSelect"></span></p>
+      <p><img src="./assets/icons/checkin.png"><span id="inTime">--</span></p>
+      <p><img src="./assets/icons/checkout.png"><span id="outTime">--</span></p>
     </div>
   </section>
 
+<!---Break Time------>
   <section class="card brake">
-  <div class="card-header">
-    <h3>Break Time</h3>
-    <div class="check-bttn">
-      <button id="brkout" class="btn brkin">Out</button>
-      <br>
-      <button id="brkin" class="btn brkout">In</button>
+    <div class="card-header">
+      <h3>Break Time</h3>
+      <div class="check-bttn">
+        <button id="brkout" class="btn brkin">Out</button><br>
+        <button id="brkin" class="btn brkout">In</button>
+      </div>
     </div>
-  </div>
-  <div class="card-body red">
-    <p class="branch"><img src="./resources/icons/location.png"><span id="branchSelect1"></span></p>
+    <div class="card-body red">
+      <p><img src="./assets/icons/checkout.png">
+        <span id="breakOutTime">-</span>
+      </p>
+      <p><img src="./assets/icons/checkin.png">
+        <span id="breakInTime">-</span>
+      </p>
+      <p><img src="./assets/icons/purpose.png">
+        <span id="breakPurpose">-</span>
+      </p>
+    </div>
+  </section>
 
-    <p><img src="./resources/icons/checkout.png">
-      <span id="breakOutTime">--</span>
-    </p>
+<!-----Leave Application-------->
+  <section class="card leave">
+    <div class="card-header">
+      <h3>Leave Application</h3>
+      <div class="check-bttn">
+        <button id="alyLeav" class="btn alyLeav">Apply</button><br>
+        <button id="cslLeav" class="btn cslLeav">Cancel</button>
+      </div>
+    </div>
+    <div class="card-body red">
+      <p><img src="./assets/icons/aplydate.png">
+        <span id="ApplyDate">-</span>
+      </p>
+      <p><img src="./assets/icons/levdate.png">
+        <span id="leaveDate">-</span>
+      </p>
+      <p><img src="./assets/icons/status.png">
+        <span id="leaveStatus">-</span>
+      </p>
+    </div>
+  </section>
 
-    <p><img src="./resources/icons/checkin.png">
-      <span id="breakInTime">--</span>
-    </p>
-
-    <p><img src="./resources/icons/purpose.png">
-      <span id="breakPurpose">--</span>
-    </p>
-  </div>
-</section>
-
-
-  <div id="status" class="status-box"></div>
+<div id="status" class="status-box"></div>
 </main>
 
+<!-- Loading-- -->
 <div id="loader"><div class="spinner"></div></div>
 
 <!-- Break Purpose Popup -->
@@ -105,247 +109,61 @@
   </div>
 </div>
 
-<script type="module">
-import { db } from './firebase.js';
-import { 
-  getDoc, doc, addDoc, updateDoc, collection, getDocs, query, where, serverTimestamp 
-} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+<!--leave popup-->
+<div id="leavePopup" class="popup-overlay-leave">
+  <div class="leave-popup">
+    <div class="titile">
+      <h3>Leave Application</h3>
+      <p>Fill all required fields</p>
+    </div>
+    <div class="inputFelds" >
 
-// ---------------- ELEMENTS ----------------
-const loader = document.getElementById("loader");
-const currentUser = JSON.parse(localStorage.getItem("loggedUser"));
-if (!currentUser) window.location.href = "./";
+      <div class="inputBox">
+        <label for="levType">Leave Type</label>
+        <select id="levType" required>
+          <option disabled selected>select leave type</option>
+          <option value="Half">Half</option>
+          <option value="Full">Full</option>
+        </select>
+      </div>
 
-const userName = document.getElementById("userName");
-const markBtn = document.getElementById("markBtn");
-const checkoutBtn = document.getElementById("checkout");
-const brkoutBtn = document.getElementById("brkout");
-const brkinBtn = document.getElementById("brkin");
+      <div class="inputBox" id="levTimeBox" style="display: none;">
+        <label for="levTime">Timing</label>
+        <select id="levTime" >
+          <option disabled selected></option>
+          <option value="Morning">Morning</option>
+          <option value="Afternoon">Afternoon</option>
+        </select>
+      </div>
 
-const inTimeEl = document.getElementById("inTime");
-const outTimeEl = document.getElementById("outTime");
-const breakOutTimeEl = document.getElementById("breakOutTime");
-const breakInTimeEl = document.getElementById("breakInTime");
-const breakPurposeEl = document.getElementById("breakPurpose");
-const branchEl = document.getElementById("branchSelect");
-const branchEl1 = document.getElementById("branchSelect1");
+      <div class="inputBox">
+        <label for="levDate">Leave From</label>
+        <input type="date" id="levDate" placeholder="Leave Date" >
+      </div>
 
-userName.textContent = currentUser.user;
+      <div class="inputBox">
+        <label for="levToDate">Leave To</label>
+        <input type="date" id="levToDate" placeholder="to date">
+      </div>
 
-// ---------------- LOAD BRANCH ----------------
-const branchRef = doc(db, "branches", currentUser.branchId);
-const branchDoc = await getDoc(branchRef);
-let branch = null;
-if (branchDoc.exists()) {
-  branch = branchDoc.data();
-  branchEl.textContent = branch.name;
-  branchEl1.textContent = branch.name;
-}
+      <div class="inputBox">
+        <label for="levReason">Reason</label>
+        <input type="text" id="levReason" placeholder="Reason for leave">
+      </div>
+    </div>
+    
+    <div class="leave-popup-buttons">
+      <button id="CancelAplitn" class="btn leavcancel">Cancel</button>
+      <button id="ConfirmLev" class="btn leavconfirm">Apply</button>
+    </div>
+  </div>
+</div>
 
-// ---------------- UTILITY ----------------
-function getDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371000;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2)**2 +
-            Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180) *
-            Math.sin(dLon/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
+<script type="module" src="./assets/js/attendance.js"></script>
+<script type="module" src="./assets/js/leaveapp.js"></script>
+<script src="./assets/js/utils/popup.js"></script>
+<script type="module" src="./assets/js/utils/topbar.js"></script>
 
-// ---------------- DATE-TIME FORMAT ----------------
-function formatDateTime(timestamp) {
-  const d = timestamp instanceof Date ? timestamp : timestamp.toDate();
-  const day = String(d.getDate()).padStart(2,'0');
-  const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  const month = monthNames[d.getMonth()];
-  const year = d.getFullYear();
-
-  let hours = d.getHours();
-  const minutes = String(d.getMinutes()).padStart(2,'0');
-  const seconds = String(d.getSeconds()).padStart(2,'0');
-  const ampm = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12 || 12;
-
-  return `${day} ${month} ${year} : ${String(hours).padStart(2,'0')}:${minutes}:${seconds} ${ampm}`;
-}
-
-// ---------------- LOAD TODAY ATTENDANCE ----------------
-const todayStr = new Date().toISOString().slice(0,10);
-const attQuery = query(collection(db, "attendance"),
-  where("userId", "==", currentUser.id),
-  where("dateStr", "==", todayStr)
-);
-
-let attRef = null;
-let attData = null;
-
-const attSnap = await getDocs(attQuery);
-if (!attSnap.empty) {
-  attRef = attSnap.docs[0].ref;
-  attData = attSnap.docs[0].data();
-
-  if (attData.time)
-    inTimeEl.textContent = formatDateTime(attData.time);
-  if (attData.outTime)
-    outTimeEl.textContent = formatDateTime(attData.outTime);
-  if (attData.breakOutTime)
-    breakOutTimeEl.textContent = formatDateTime(attData.breakOutTime);
-  if (attData.breakInTime)
-    breakInTimeEl.textContent = formatDateTime(attData.breakInTime);
-  if (attData.breakPurpose)
-    breakPurposeEl.textContent = attData.breakPurpose;
-}
-
-// ---------------- BUTTON STATE ----------------
-function updateButtonState() {
-  if (!attData) {
-    checkoutBtn.disabled = true;
-    brkoutBtn.disabled = true;
-    brkinBtn.disabled = true;
-    return;
-  }
-
-  checkoutBtn.disabled = !!attData.outTime;
-  brkoutBtn.disabled = !!attData.breakOutTime || !!attData.outTime;
-  brkinBtn.disabled = !attData.breakOutTime || !!attData.breakInTime || !!attData.outTime;
-}
-updateButtonState();
-
-// ---------------- CHECK-IN ----------------
-markBtn.onclick = async () => {
-  loader.style.display = "flex";
-  navigator.geolocation.getCurrentPosition(async (pos) => {
-    const { latitude, longitude } = pos.coords;
-    const distance = getDistance(latitude, longitude, branch.lat, branch.lng);
-
-    if (distance > branch.radius_m && currentUser.role !== "admin") {
-      loader.style.display = "none";
-      return alert("❌ You are outside the branch area!");
-    }
-
-    const existing = await getDocs(attQuery);
-    if (!existing.empty) {
-      loader.style.display = "none";
-      return alert("⚠️ Already Checked In Today!");
-    }
-
-    const docRef = await addDoc(collection(db, "attendance"), {
-      userId: currentUser.id,
-      username: currentUser.username,
-      branchId: currentUser.branchId,
-      branchName: branch.name,
-      time: serverTimestamp(),
-      dateStr: todayStr,
-      location: { lat: latitude, lng: longitude, distance }
-    });
-
-    attRef = docRef;
-    attData = { userId: currentUser.id, time: { toDate: () => new Date() } };
-
-    inTimeEl.textContent = formatDateTime(attData.time);
-    alert("✅ Checked In Successfully!");
-    updateButtonState();
-    loader.style.display = "none";
-  });
-};
-
-// ---------------- CHECK-OUT ----------------
-checkoutBtn.onclick = async () => {
-  if (!attRef) return alert("⚠️ You must Check In first!");
-  if (attData?.outTime) return alert("✅ You already Checked Out!");
-
-  const popup = document.getElementById("checkoutPopup");
-  popup.style.display = "flex";
-  const confirmBtn = document.getElementById("checkoutConfirm");
-  const cancelBtn = document.getElementById("checkoutCancel");
-  const closePopup = () => popup.style.display = "none";
-  cancelBtn.onclick = closePopup;
-
-  confirmBtn.onclick = async () => {
-    closePopup();
-    loader.style.display = "flex";
-
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const { latitude, longitude } = pos.coords;
-      const distance = getDistance(latitude, longitude, branch.lat, branch.lng);
-      if (distance > branch.radius_m && currentUser.role !== "admin") {
-        loader.style.display = "none";
-        return alert("❌ Outside branch area!");
-      }
-
-      await updateDoc(attRef, { outTime: serverTimestamp() });
-      attData.outTime = { toDate: () => new Date() };
-      outTimeEl.textContent = formatDateTime(attData.outTime);
-
-      alert("✅ Checked Out Successfully!");
-      updateButtonState();
-      loader.style.display = "none";
-    });
-  };
-};
-
-// ---------------- BREAK-OUT ----------------
-brkoutBtn.onclick = async () => {
-  if (!attRef) return alert("⚠️ You must Check In first!");
-  if (attData?.breakOutTime) return alert("⚠️ You already took a break!");
-
-  const popup = document.getElementById("breakPopup");
-  popup.style.display = "flex";
-  const input = document.getElementById("breakPurposeInput");
-  const confirmBtn = document.getElementById("breakConfirm");
-  const cancelBtn = document.getElementById("breakCancel");
-  input.value = "";
-  const closePopup = () => popup.style.display = "none";
-  cancelBtn.onclick = closePopup;
-
-  confirmBtn.onclick = async () => {
-    const purpose = input.value.trim();
-    if (!purpose) return alert("Please enter a break reason!");
-    closePopup();
-    loader.style.display = "flex";
-
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const { latitude, longitude } = pos.coords;
-      const distance = getDistance(latitude, longitude, branch.lat, branch.lng);
-      if (distance > branch.radius_m && currentUser.role !== "admin") {
-        loader.style.display = "none";
-        return alert("❌ Outside branch area!");
-      }
-
-      await updateDoc(attRef, { breakOutTime: serverTimestamp(), breakPurpose: purpose });
-      attData.breakOutTime = { toDate: () => new Date() };
-      attData.breakPurpose = purpose;
-
-      breakOutTimeEl.textContent = formatDateTime(attData.breakOutTime);
-      breakPurposeEl.textContent = purpose;
-      alert("☕ Break Out Recorded!");
-      updateButtonState();
-      loader.style.display = "none";
-    });
-  };
-};
-
-// ---------------- BREAK-IN ----------------
-brkinBtn.onclick = async () => {
-  if (!attRef) return alert("⚠️ Check In first!");
-  if (!attData?.breakOutTime) return alert("⚠️ You haven't done Break Out!");
-  if (attData?.breakInTime) return alert("✅ Already Break In done!");
-
-  await updateDoc(attRef, { breakInTime: serverTimestamp() });
-  attData.breakInTime = { toDate: () => new Date() };
-  breakInTimeEl.textContent = formatDateTime(attData.breakInTime);
-
-  alert("✅ Break In Done!");
-  updateButtonState();
-};
-
-// ---------------- SIGN OUT ----------------
-document.getElementById("signOutBtn").addEventListener("click", () => {
-  localStorage.removeItem("loggedUser");
-  window.location.href = "./";
-});
-</script>
 
 </body>
 </html>

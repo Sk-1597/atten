@@ -1,0 +1,149 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  height: 85vh;
+  padding: 10px; 
+  overflow: hidden;
+}
+.userFilter-feld {
+  position: fixed;
+  top: 60px; 
+  left: 0;
+  right: 0;
+  background: #ebebeb;
+  z-index: 100;
+  padding: 10px;
+  
+}
+.user_info {
+  display: flex;
+  align-items: center;  
+  gap: 10px;
+  top: 0;
+}
+.user_info img {
+  height: 50px;
+  width: 50px;
+  background-color: #b40000;
+  border-radius: 50%;
+  padding: 10px;
+}
+.user_email {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+.his-user {
+  font-size: 19px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0;
+}
+.his-email {
+  font-size: 16px;
+  font-weight: 700;
+  color: #555;
+  margin: 0;
+}
+.filter_feld {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 26px; 
+}
+.inputBox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-apply button {
+  background: #b40000;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-apply button:hover {
+  background: #c60000;
+}
+#historyContainer {
+  margin-top: 145px;
+  overflow-y: auto;
+  flex: 1;
+  height: calc(100vh - 220px);
+}
+#historyContainer::-webkit-scrollbar {
+  width: 6px;
+}
+#historyContainer::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+#historyContainer::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+.card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 10px;
+  font-size: 14px;
+  display: flex;
+  flex-direction: row;
+  gap: 70px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.card .attendance,
+.card .breake {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.card-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 5px 0; 
+}
+.nameBranch {
+  background-color: #b40000;
+  width: 130px;
+  height: 25px;
+  border-radius: 0 0 60px;  
+}
+.nameBranch h3 {
+  font-size: 18px;
+  font-weight: bolder;
+  color: #ffffff; 
+}
+.card-body p {
+  display: flex;
+  align-items: center;
+  margin: 3px 0;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 600;
+  padding: 7px;
+}
+.branch_nme {
+  text-transform: uppercase;
+}
+.card-body p img {
+  height: 18px;
+  width: 18px;
+  padding: 3px;
+  border-radius: 50%;
+  background: #b40000;
+  box-shadow: 0 0 2px rgba(0,0,0,0.15);
+  flex-shrink: 0;
+}
+.breake {
+  background: #fafafa;
+  border-radius: 6px;
+  padding: 6px;
+}
