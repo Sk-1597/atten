@@ -31,8 +31,7 @@ async function loadTodayLeave() {
   try {
     const leaveRef = query(
       collection(db, "leaveRequests"),
-      where("userId", "==", currentUser.id),
-      where("dateStr", "==", todayStr)
+      where("userId", "==", currentUser.id)
     );
 
     const snapshot = await getDocs(leaveRef);
@@ -50,7 +49,7 @@ async function loadTodayLeave() {
     const docData = snapshot.docs[0].data();
     todayLeaveDocId = snapshot.docs[0].id;
 
-    ApplyDate.textContent = formatDate(docData.dateStr) || "-";
+    ApplyDate.textContent = formatDate(docData.createdAt) || "-";
     leaveDate.textContent = formatDate(docData.fromDate) || "-";
     leaveStatus.textContent = docData.status || "Pending";
 
