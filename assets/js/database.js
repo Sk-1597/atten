@@ -1,6 +1,6 @@
 // firebase.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-import { getFirestore,  getDoc,  doc,  addDoc,  updateDoc, deleteDoc,  collection,  getDocs,  query,  where, orderBy, onSnapshot,  writeBatch, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+import { getFirestore,  getDoc,  doc,  addDoc,  updateDoc, deleteDoc,  collection,  getDocs,  query,  where, orderBy, onSnapshot,  writeBatch, limit, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
 const firebaseConfig = {
     // main db
@@ -27,4 +27,4 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-export { db,  getDoc,  doc,  addDoc,  updateDoc, deleteDoc,  collection,  getDocs,  query,  where, orderBy, onSnapshot,  writeBatch, limit, serverTimestamp };
+export { db,  getDoc,  doc,  addDoc,  updateDoc, deleteDoc,  collection,  getDocs,  query,  where, orderBy, onSnapshot,  writeBatch, limit, serverTimestamp, setDoc };

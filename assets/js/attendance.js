@@ -1,4 +1,4 @@
-import { db,  getDoc,  doc,  addDoc,  updateDoc,  collection,  getDocs,  query,  where,  serverTimestamp } from './database.js';
+import { db,  getDoc,  doc,  addDoc,  updateDoc,  collection,  getDocs,  query,  where,  serverTimestamp, setDoc } from './database.js';
 import { loader, currentUser } from "./utils/loggeduser.js";
 
 
@@ -27,6 +27,32 @@ if (branchDoc.exists()) {
   branch = branchDoc.data();
   branchEl.textContent = branch.name;
 }
+
+function startLocationWatch() {
+  if (!('geolocation' in navigator)) return;
+  try {
+    window.__geoWatchId = navigator.geolocation.watchPosition(async (pos) => {
+      const { latitude, longitude, accuracy } = pos.coords;
+      try {
+        await setDoc(doc(db, 'userLocations', currentUser.id), {
+          userId: currentUser.id,
+          username: currentUser.username,
+          branchId: currentUser.branchId,
+          location: { lat: latitude, lng: longitude, accuracy },
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      } catch {}
+    }, () => {}, { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 });
+  } catch {}
+}
+
+startLocationWatch();
+
+window.addEventListener('beforeunload', () => {
+  if (window.__geoWatchId) {
+    try { navigator.geolocation.clearWatch(window.__geoWatchId); } catch {}
+  }
+});
 
 // ---------------- UTILITY ----------------
 function getDistance(lat1, lon1, lat2, lon2) {

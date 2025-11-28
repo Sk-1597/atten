@@ -38,7 +38,10 @@ fetch("./common/navbar.html")
       if (signOutBtn) {
         signOutBtn.addEventListener("click", () => {
           localStorage.removeItem("loggedUser");
-          window.location.href = "./";
+          if (window.__geoWatchId) {
+            try { navigator.geolocation.clearWatch(window.__geoWatchId); } catch {}
+          }
+          window.location.href = "./index.html";
         });
       } else {
         console.warn("⚠️ signOutBtn not found in navbar.");

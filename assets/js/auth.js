@@ -1,4 +1,4 @@
-import { db, collection, getDocs, query, where, updateDoc, doc } from './database.js';
+import { db, collection, getDocs, query, where, updateDoc, doc, serverTimestamp } from './database.js';
 
 const statusBox = document.getElementById("status-mssg");
 const email = document.getElementById("email");
@@ -131,6 +131,31 @@ document.getElementById("signInBtn").onclick = async () => {
 
   localStorage.setItem("loggedUser", JSON.stringify(minimalUserData));
 
+  const storedLoc = sessionStorage.getItem('lastLocation');
+  if (storedLoc) {
+    try {
+      const parsed = JSON.parse(storedLoc);
+      await updateDoc(doc(db, 'users', docSnap.id), {
+        lastLoginLocation: parsed,
+        lastLoginAt: serverTimestamp()
+      });
+    } catch {}
+  }
+
   // 🔹 Redirect
   window.location.href = "./attendance.html";
 };
+
+(async () => {
+  const ok = await checkLocationEnabled();
+  if (ok && lastPosition?.coords) {
+    sessionStorage.setItem('lastLocation', JSON.stringify({
+      lat: lastPosition.coords.latitude,
+      lng: lastPosition.coords.longitude,
+      accuracy: lastPosition.coords.accuracy
+    }));
+    statusBox.textContent = "Location ready";
+  } else {
+    if (enableLocationBtn) enableLocationBtn.style.display = "block";
+  }
+})();
