@@ -152,7 +152,7 @@ submitFileBtn.addEventListener('click', async () => {
   alert(`TA File ${taNumber} submitted for approval.`);
 
   taFileBody.innerHTML = '';
-  fileTotalEl.textContent = 'File Total: ₹0.00';
+  fileTotalEl.textContent = '₹0.00';
   submitFileBtn.style.display = 'none';
 });
 

@@ -91,7 +91,7 @@ function renderTable(data, sectionId) {
 
     const number = d.number || "-";
     const amount = Number(d.amount || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 });
-    const actionBtn = `<button class="action-btn" onclick="showActionMenu('${sectionId}','${d.id}')">•••</button>`;
+    const actionBtn = `<button class="action-btn" onclick="showActionMenu('${sectionId}','${d.id}')">🗑️</button>`;
 
     if (sectionId === "fd") {
       rows += `
@@ -162,17 +162,18 @@ function applyFilters() {
   renderTable(filteredData, currentSection);  
 }
 
-// 🔹 Action Menu
+// 🔹 Delete Action Only
 window.showActionMenu = async (section, id) => {
-  const choice = prompt("Type 'E' to Edit or 'D' to Delete:");
-  if (!choice) return;
+  const confirmDelete = confirm("Are you sure you want to delete this record?");
+  if (!confirmDelete) return;
 
-  if (choice.toUpperCase() === "D") {
-    if (confirm("Delete this record?")) {
-      await deleteDoc(doc(db, section + "_accounts", id));
-      alert("Record deleted!");
-      loadSectionTable(currentSection);
-    }
+  try {
+    await deleteDoc(doc(db, section + "_accounts", id));
+    alert("✅ Record deleted successfully!");
+    loadSectionTable(currentSection);
+  } catch (error) {
+    console.error("Error deleting record:", error);
+    alert("❌ Failed to delete record. Try again.");
   }
 };
 
