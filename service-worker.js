@@ -40,9 +40,12 @@ self.addEventListener("activate", event => {
 // Fetch from cache or network
 self.addEventListener("fetch", event => {
     event.respondWith(
-        caches.match(event.request).then(response => {
+        caches.match(event.request, { ignoreSearch: true }).then(response => {
             return response || fetch(event.request).catch(() => {
-                // Optional: Return offline page if fetch fails and not in cache
+                // Return index.html for any navigation request if offline/failed
+                if (event.request.mode === 'navigate') {
+                    return caches.match('./index.html');
+                }
             });
         })
     );
