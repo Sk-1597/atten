@@ -133,7 +133,7 @@ submitFileBtn.addEventListener('click', async () => {
   const fileData = {
     taNumber,
     entries: currentEntries.map(e => ({
-      from: e.purpose, to: e.to, mode: e.mode, km: e.km, fare: e.fare, total: e.total
+      from: e.purpose, to: e.to, mode: e.mode, km: e.km, fare: e.fare, total: e.total, date: e.createdAt
     })),
     totalAmount: total,
     status: 'pending',

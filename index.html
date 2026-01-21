@@ -31,7 +31,7 @@
   </div>
 
   <button id="signInBtn" class="login-btn">Login</button>
-  <button id="enableLocationBtn" class="login-btn" style="display:none; margin-top:8px;">Enable Location</button>
+  <button id="enableLocationBtn" class="login-btn" style="display:none; margin-top:8px; margin-left: 43px;">Enable Location</button>
 
   <div class="links">
     <a href="tel:8943359116">Help</a>
@@ -42,7 +42,7 @@
   <script type="module" src="./assets/js/auth.js"></script>
   <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./resources/service-worker.js')
+    navigator.serviceWorker.register('./service-worker.js')
       .then(() => console.log("Service Worker registered"))
       .catch(err => console.error("SW registration failed", err));
   }
