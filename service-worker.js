@@ -2,7 +2,7 @@ const CACHE_NAME = "artgroup-cache-v2";
 const urlsToCache = [
     "./",
     "./index.html",
-    "./resources/manifest.json",
+    "./manifest.json",
     "./assets/images/icon.png",
     "./assets/css/mobil.css",
     "./assets/js/auth.js"
