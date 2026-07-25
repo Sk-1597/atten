@@ -31,7 +31,7 @@ const requestLocation = () => new Promise((resolve) => {
     () => {
       resolve(false);
     },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
   );
 });
 
@@ -79,7 +79,7 @@ document.getElementById("signInBtn").onclick = async () => {
     return;
   }
 
-  const locationOk = await checkLocationEnabled();
+  const locationOk = await requestLocation();
   if (!locationOk) {
     statusBox.textContent = "Location is off. Enable location to continue";
     if (enableLocationBtn) enableLocationBtn.style.display = "block";

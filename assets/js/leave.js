@@ -137,13 +137,22 @@ async function loadLeaves() {
     </table>
   `;
 
-  // ✅ Update Summary UI
   document.getElementById("medMonth").textContent = stats.Medical.month;
   document.getElementById("medYear").textContent = stats.Medical.year;
   document.getElementById("casMonth").textContent = stats.Casual.month;
   document.getElementById("casYear").textContent = stats.Casual.year;
   document.getElementById("lopMonth").textContent = stats.LOP.month;
   document.getElementById("lopYear").textContent = stats.LOP.year;
+
+  // ✅ Update Main Page Summary UI
+  const medYearMain = document.getElementById("medYearMain");
+  if (medYearMain) medYearMain.textContent = stats.Medical.year;
+  
+  const casYearMain = document.getElementById("casYearMain");
+  if (casYearMain) casYearMain.textContent = stats.Casual.year;
+  
+  const lopYearMain = document.getElementById("lopYearMain");
+  if (lopYearMain) lopYearMain.textContent = stats.LOP.year;
 }
 
 // 🔹 Call the function

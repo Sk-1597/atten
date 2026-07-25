@@ -12,9 +12,7 @@ const brkinBtn = document.getElementById("brkin");
 
 const inTimeEl = document.getElementById("inTime");
 const outTimeEl = document.getElementById("outTime");
-const breakOutTimeEl = document.getElementById("breakOutTime");
-const breakInTimeEl = document.getElementById("breakInTime");
-const breakPurposeEl = document.getElementById("breakPurpose");
+const breaksContainer = document.getElementById("breaksContainer");
 const branchEl = document.getElementById("branchSelect");
 
 userName.textContent = currentUser.user;
@@ -101,12 +99,43 @@ if (!attSnap.empty) {
     inTimeEl.textContent = formatDateTime(attData.time);
   if (attData.outTime)
     outTimeEl.textContent = formatDateTime(attData.outTime);
-  if (attData.breakOutTime)
-    breakOutTimeEl.textContent = formatDateTime(attData.breakOutTime);
-  if (attData.breakInTime)
-    breakInTimeEl.textContent = formatDateTime(attData.breakInTime);
-  if (attData.breakPurpose)
-    breakPurposeEl.textContent = attData.breakPurpose;
+
+  // Initialize breaks array for backwards compatibility
+  if (!attData.breaks) {
+    attData.breaks = [];
+    if (attData.breakOutTime) {
+      attData.breaks.push({
+        outTime: attData.breakOutTime,
+        inTime: attData.breakInTime,
+        purpose: attData.breakPurpose,
+        type: attData.breakType || "Personal"
+      });
+    }
+  }
+  renderBreaks();
+}
+
+function renderBreaks() {
+  breaksContainer.innerHTML = "";
+  if (!attData || !attData.breaks || attData.breaks.length === 0) {
+    breaksContainer.innerHTML = "<p style='text-align:center'>No breaks yet</p>";
+    return;
+  }
+  
+  attData.breaks.forEach((b, index) => {
+    const breakEl = document.createElement("div");
+    breakEl.style.borderBottom = "1px solid #ffcccc";
+    breakEl.style.paddingBottom = "10px";
+    breakEl.style.marginBottom = "10px";
+    
+    breakEl.innerHTML = `
+      <p><strong>Break ${index + 1} (${b.type || "Personal"})</strong></p>
+      <p><img src="./assets/icons/checkout 2.png"> <span>${b.outTime ? formatDateTime(b.outTime) : "-"}</span></p>
+      <p><img src="./assets/icons/checkin 2.png"> <span>${b.inTime ? formatDateTime(b.inTime) : "-"}</span></p>
+      <p><img src="./assets/icons/purpose.png"> <span>${b.purpose || "-"}</span></p>
+    `;
+    breaksContainer.appendChild(breakEl);
+  });
 }
 
 // ---------------- BUTTON STATE ----------------
@@ -118,9 +147,11 @@ function updateButtonState() {
     return;
   }
 
-  checkoutBtn.disabled = !!attData.outTime;
-  brkoutBtn.disabled = !!attData.breakOutTime || !!attData.outTime;
-  brkinBtn.disabled = !attData.breakOutTime || !!attData.breakInTime || !!attData.outTime;
+  const hasOpenBreak = attData.breaks && attData.breaks.length > 0 && !attData.breaks[attData.breaks.length - 1].inTime;
+
+  checkoutBtn.disabled = !!attData.outTime || hasOpenBreak;
+  brkoutBtn.disabled = !!attData.outTime || hasOpenBreak;
+  brkinBtn.disabled = !!attData.outTime || !hasOpenBreak;
 }
 updateButtonState();
 
@@ -153,13 +184,17 @@ markBtn.onclick = async () => {
     });
 
     attRef = docRef;
-    attData = { userId: currentUser.id, time: { toDate: () => new Date() } };
+    attData = { userId: currentUser.id, time: { toDate: () => new Date() }, breaks: [] };
 
     inTimeEl.textContent = formatDateTime(attData.time);
+    renderBreaks();
     alert("✅ Checked In Successfully!");
     updateButtonState();
     loader.style.display = "none";
-  });
+  }, (error) => {
+    loader.style.display = "none";
+    alert("❌ Location error: " + error.message);
+  }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 });
 };
 
 // ---------------- CHECK-OUT ----------------
@@ -193,26 +228,37 @@ checkoutBtn.onclick = async () => {
       alert("✅ Checked Out Successfully!");
       updateButtonState();
       loader.style.display = "none";
-    });
+    }, (error) => {
+      loader.style.display = "none";
+      alert("❌ Location error: " + error.message);
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 });
   };
 };
 
 // ---------------- BREAK-OUT ----------------
 brkoutBtn.onclick = async () => {
   if (!attRef) return alert("⚠️ You must Check In first!");
-  if (attData?.breakOutTime) return alert("⚠️ You already took a break!");
+  if (attData?.outTime) return alert("⚠️ You already Checked Out!");
+  
+  const hasOpenBreak = attData.breaks && attData.breaks.length > 0 && !attData.breaks[attData.breaks.length - 1].inTime;
+  if (hasOpenBreak) return alert("⚠️ You are already on a break!");
 
   const popup = document.getElementById("breakPopup");
   popup.style.display = "flex";
   const input = document.getElementById("breakPurposeInput");
+  const typeInput = document.getElementById("breakTypeInput");
   const confirmBtn = document.getElementById("breakConfirm");
   const cancelBtn = document.getElementById("breakCancel");
+  
   input.value = "";
+  if (typeInput) typeInput.value = "Personal";
+  
   const closePopup = () => popup.style.display = "none";
   cancelBtn.onclick = closePopup;
 
   confirmBtn.onclick = async () => {
     const purpose = input.value.trim();
+    const type = typeInput ? typeInput.value : "Personal";
     if (!purpose) return alert("Please enter a break reason!");
     closePopup();
     loader.style.display = "flex";
@@ -225,30 +271,71 @@ brkoutBtn.onclick = async () => {
         return alert("❌ Outside branch area!");
       }
 
-      await updateDoc(attRef, { breakOutTime: serverTimestamp(), breakPurpose: purpose });
-      attData.breakOutTime = { toDate: () => new Date() };
-      attData.breakPurpose = purpose;
+      const newBreak = { 
+        outTime: new Date(), 
+        purpose: purpose,
+        type: type 
+      };
+      
+      attData.breaks.push(newBreak);
 
-      breakOutTimeEl.textContent = formatDateTime(attData.breakOutTime);
-      breakPurposeEl.textContent = purpose;
+      // Keep legacy fields updated for history.js backward compatibility
+      const updateData = { breaks: attData.breaks };
+      if (attData.breaks.length === 1) {
+        updateData.breakOutTime = serverTimestamp();
+        updateData.breakPurpose = purpose;
+        updateData.breakType = type;
+      }
+
+      await updateDoc(attRef, updateData);
+      
+      renderBreaks();
       alert("☕ Break Out Recorded!");
       updateButtonState();
       loader.style.display = "none";
-    });
+    }, (error) => {
+      loader.style.display = "none";
+      alert("❌ Location error: " + error.message);
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 });
   };
 };
 
 // ---------------- BREAK-IN ----------------
 brkinBtn.onclick = async () => {
   if (!attRef) return alert("⚠️ Check In first!");
-  if (!attData?.breakOutTime) return alert("⚠️ You haven't done Break Out!");
-  if (attData?.breakInTime) return alert("✅ Already Break In done!");
+  if (attData?.outTime) return alert("⚠️ You already Checked Out!");
+  
+  const hasOpenBreak = attData.breaks && attData.breaks.length > 0 && !attData.breaks[attData.breaks.length - 1].inTime;
+  if (!hasOpenBreak) return alert("⚠️ You are not currently on a break!");
 
-  await updateDoc(attRef, { breakInTime: serverTimestamp() });
-  attData.breakInTime = { toDate: () => new Date() };
-  breakInTimeEl.textContent = formatDateTime(attData.breakInTime);
+  loader.style.display = "flex";
+  
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const { latitude, longitude } = pos.coords;
+    const distance = getDistance(latitude, longitude, branch.lat, branch.lng);
+    if (distance > branch.radius_m && currentUser.role !== "admin") {
+      loader.style.display = "none";
+      return alert("❌ Outside branch area!");
+    }
 
-  alert("✅ Break In Done!");
-  updateButtonState();
+    const lastBreak = attData.breaks[attData.breaks.length - 1];
+    lastBreak.inTime = new Date();
+
+    const updateData = { breaks: attData.breaks };
+    // Keep legacy field updated for history.js
+    if (attData.breaks.length === 1) {
+      updateData.breakInTime = serverTimestamp();
+    }
+
+    await updateDoc(attRef, updateData);
+    
+    renderBreaks();
+    alert("✅ Break In Done!");
+    updateButtonState();
+    loader.style.display = "none";
+  }, (error) => {
+    loader.style.display = "none";
+    alert("❌ Location error: " + error.message);
+  }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 });
 };
 
