@@ -1,9 +1,9 @@
 const CACHE_NAME = "artgroup-cache-v1";
 const urlsToCache = [
-  "/staffmanage/",
-  "/staffmanage/index.html",
-  "/staffmanage/manifest.json",
-  "/staffmanage/assets/images/icon.png"
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./assets/images/icon.png"
 ];
 
 // Install Service Worker and cache assets
