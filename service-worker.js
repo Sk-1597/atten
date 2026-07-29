@@ -1,34 +1,53 @@
-const CACHE_NAME = "artgroup-cache-v1";
+const CACHE_NAME = 'artgroup-staffmanage-v1';
 const urlsToCache = [
-  "./",
-  "./index.html",
-  "./manifest.json",
-  "./assets/images/icon.png"
+  '/',
+  '/index.html',
+  '/attendance.html',
+  '/profile.html',
+  '/leave.html',
+  '/allowance.html',
+  '/history.html',
+  '/performance.html',
+  '/assets/css/mobil.css',
+  '/assets/images/logo.png',
+  '/assets/images/icon.png',
+  '/assets/js/auth.js',
+  '/assets/js/attendance.js',
+  '/assets/js/database.js'
 ];
 
-// Install Service Worker and cache assets
-self.addEventListener("install", event => {
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        return cache.addAll(urlsToCache);
+      })
   );
-  console.log("✅ Service Worker Installed");
 });
 
-// Activate SW
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.map(key => key !== CACHE_NAME && caches.delete(key)))
-    )
-  );
-  console.log("🚀 Service Worker Activated");
-});
-
-// Fetch from cache or network
-self.addEventListener("fetch", event => {
+self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
+    caches.match(event.request)
+      .then(response => {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      })
+  );
+});
+
+self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
     })
   );
 });

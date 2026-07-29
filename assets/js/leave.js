@@ -28,7 +28,7 @@
     setTimeout(() => msg.textContent = "", 3000);   
   });
 */
-import { db, collection, query, where, getDocs } from "./database.js";
+import { db, collection, query, where, getDocs, getDoc, doc } from "./database.js";
 import { loader, currentUser } from "./utils/loggeduser.js";
 import { formatDate } from './utils/formatdate.js';
 
@@ -41,9 +41,25 @@ const leaveTypes = ["Medical", "Casual", "LOP"];
 async function loadLeaves() {
   leaveTables.innerHTML = "";
 
+  // 🔹 Fetch user document for manual leaves
+  let manualMedical = 0;
+  let manualCasual = 0;
+  try {
+    const userSnap = await getDoc(doc(db, "users", currentUser.id));
+    if (userSnap.exists()) {
+      const u = userSnap.data();
+      if (u.manualLeaveYear === year) {
+        manualMedical = Number(u.manualMedical) || 0;
+        manualCasual = Number(u.manualCasual) || 0;
+      }
+    }
+  } catch (err) {
+    console.error("Error fetching user data:", err);
+  }
+
   const stats = {
-    Medical: { month: 0, year: 0 },
-    Casual: { month: 0, year: 0 },
+    Medical: { month: 0, year: manualMedical },
+    Casual: { month: 0, year: manualCasual },
     LOP: { month: 0, year: 0 },
   };
 
