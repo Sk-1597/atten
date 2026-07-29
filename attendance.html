@@ -36,6 +36,27 @@
     </div>
   </section>
 
+<!---Deputation-->
+  <section class="card">
+    <div class="card-header">
+      <h3>Deputation</h3>
+      <div class="check-bttn">
+        <button id="depCheckinBtn" class="btn checkin">Check In</button><br>
+        <button id="depCheckoutBtn" class="btn checkout">Check Out</button>
+      </div>
+    </div>
+    <div class="card-body blue">
+      <p class="branch">
+        <img src="./assets/icons/location.png">
+        <select id="depBranchSelect" style="margin-left:5px; padding:3px; border-radius:3px; width: 60%; background: transparent; border: 1px solid #ccc; color: inherit; font-family: inherit;">
+          <option value="" disabled selected>Select Branch</option>
+        </select>
+      </p>
+      <p><img src="./assets/icons/checkin.png"><span id="depInTime">--</span></p>
+      <p><img src="./assets/icons/checkout.png"><span id="depOutTime">--</span></p>
+    </div>
+  </section>
+
 <!---Break Time------>
   <section class="card brake">
     <div class="card-header">

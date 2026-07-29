@@ -15,6 +15,12 @@ const outTimeEl = document.getElementById("outTime");
 const breaksContainer = document.getElementById("breaksContainer");
 const branchEl = document.getElementById("branchSelect");
 
+const depCheckinBtn = document.getElementById("depCheckinBtn");
+const depCheckoutBtn = document.getElementById("depCheckoutBtn");
+const depBranchSelect = document.getElementById("depBranchSelect");
+const depInTimeEl = document.getElementById("depInTime");
+const depOutTimeEl = document.getElementById("depOutTime");
+
 userName.textContent = currentUser.user;
  
 // ---------------- LOAD BRANCH ----------------
@@ -25,6 +31,24 @@ if (branchDoc.exists()) {
   branch = branchDoc.data();
   branchEl.textContent = branch.name;
 }
+
+// ---------------- LOAD ALL BRANCHES FOR DEPUTATION ----------------
+async function loadDeputationBranches() {
+  const branchesSnap = await getDocs(collection(db, "branches"));
+  branchesSnap.forEach(doc => {
+    if (doc.id !== currentUser.branchId) {
+      const b = doc.data();
+      const option = document.createElement("option");
+      option.value = doc.id;
+      option.textContent = b.name;
+      option.dataset.lat = b.lat;
+      option.dataset.lng = b.lng;
+      option.dataset.radius = b.radius_m || 200;
+      depBranchSelect.appendChild(option);
+    }
+  });
+}
+loadDeputationBranches();
 
 function startLocationWatch() {
   if (!('geolocation' in navigator)) return;
@@ -95,10 +119,23 @@ if (!attSnap.empty) {
   attRef = attSnap.docs[0].ref;
   attData = attSnap.docs[0].data();
 
-  if (attData.time)
-    inTimeEl.textContent = formatDateTime(attData.time);
-  if (attData.outTime)
-    outTimeEl.textContent = formatDateTime(attData.outTime);
+  if (attData.isDeputation) {
+    if (attData.time)
+      depInTimeEl.textContent = formatDateTime(attData.time);
+    if (attData.outTime)
+      depOutTimeEl.textContent = formatDateTime(attData.outTime);
+    
+    // Set the selected branch manually if it's already in the options
+    setTimeout(() => {
+      depBranchSelect.value = attData.branchId;
+      depBranchSelect.disabled = true;
+    }, 500);
+  } else {
+    if (attData.time)
+      inTimeEl.textContent = formatDateTime(attData.time);
+    if (attData.outTime)
+      outTimeEl.textContent = formatDateTime(attData.outTime);
+  }
 
   // Initialize breaks array for backwards compatibility
   if (!attData.breaks) {
@@ -144,14 +181,29 @@ function updateButtonState() {
     checkoutBtn.disabled = true;
     brkoutBtn.disabled = true;
     brkinBtn.disabled = true;
+    depCheckoutBtn.disabled = true;
     return;
   }
 
   const hasOpenBreak = attData.breaks && attData.breaks.length > 0 && !attData.breaks[attData.breaks.length - 1].inTime;
 
-  checkoutBtn.disabled = !!attData.outTime || hasOpenBreak;
-  brkoutBtn.disabled = !!attData.outTime || hasOpenBreak;
-  brkinBtn.disabled = !!attData.outTime || !hasOpenBreak;
+  if (attData.isDeputation) {
+    markBtn.disabled = true;
+    checkoutBtn.disabled = true;
+    brkoutBtn.disabled = true; 
+    brkinBtn.disabled = true;
+    depCheckinBtn.disabled = true;
+    depCheckoutBtn.disabled = !!attData.outTime;
+  } else {
+    markBtn.disabled = true;
+    depCheckinBtn.disabled = true;
+    depCheckoutBtn.disabled = true;
+    depBranchSelect.disabled = true;
+    
+    checkoutBtn.disabled = !!attData.outTime || hasOpenBreak;
+    brkoutBtn.disabled = !!attData.outTime || hasOpenBreak;
+    brkinBtn.disabled = !!attData.outTime || !hasOpenBreak;
+  }
 }
 updateButtonState();
 
@@ -337,5 +389,113 @@ brkinBtn.onclick = async () => {
     loader.style.display = "none";
     alert("❌ Location error: " + error.message);
   }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 });
+};
+
+
+// ---------------- DEPUTATION CHECK-IN ----------------
+depCheckinBtn.onclick = async () => {
+  const selectedOption = depBranchSelect.options[depBranchSelect.selectedIndex];
+  if (!selectedOption || !selectedOption.value) {
+    return alert("⚠️ Please select a branch for deputation!");
+  }
+
+  loader.style.display = "flex";
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const { latitude, longitude } = pos.coords;
+    const depBranchLat = parseFloat(selectedOption.dataset.lat);
+    const depBranchLng = parseFloat(selectedOption.dataset.lng);
+    const depBranchRadius = parseFloat(selectedOption.dataset.radius);
+    const distance = getDistance(latitude, longitude, depBranchLat, depBranchLng);
+
+    if (distance > depBranchRadius && currentUser.role !== "admin") {
+      loader.style.display = "none";
+      return alert("❌ You are outside the selected branch area!");
+    }
+
+    const existing = await getDocs(attQuery);
+    if (!existing.empty) {
+      loader.style.display = "none";
+      return alert("⚠️ Already Checked In Today!");
+    }
+
+    const docRef = await addDoc(collection(db, "attendance"), {
+      userId: currentUser.id,
+      username: currentUser.username,
+      branchId: selectedOption.value,
+      branchName: selectedOption.text,
+      isDeputation: true,
+      time: serverTimestamp(),
+      dateStr: todayStr,
+      location: { lat: latitude, lng: longitude, distance }
+    });
+
+    attRef = docRef;
+    attData = { 
+      userId: currentUser.id, 
+      time: { toDate: () => new Date() }, 
+      breaks: [], 
+      isDeputation: true, 
+      branchId: selectedOption.value 
+    };
+
+    depInTimeEl.textContent = formatDateTime(attData.time);
+    depBranchSelect.disabled = true;
+    alert("✅ Deputation Checked In Successfully!");
+    updateButtonState();
+    loader.style.display = "none";
+  }, (error) => {
+    loader.style.display = "none";
+    alert("❌ Location error: " + error.message);
+  }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 });
+};
+
+// ---------------- DEPUTATION CHECK-OUT ----------------
+depCheckoutBtn.onclick = async () => {
+  if (!attRef || !attData.isDeputation) return alert("⚠️ You must Check In for deputation first!");
+  if (attData?.outTime) return alert("✅ You already Checked Out!");
+
+  const popup = document.getElementById("checkoutPopup");
+  popup.style.display = "flex";
+  const confirmBtn = document.getElementById("checkoutConfirm");
+  const cancelBtn = document.getElementById("checkoutCancel");
+  const closePopup = () => popup.style.display = "none";
+  cancelBtn.onclick = closePopup;
+
+  confirmBtn.onclick = async () => {
+    closePopup();
+    loader.style.display = "flex";
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const { latitude, longitude } = pos.coords;
+      const selectedOption = depBranchSelect.options[depBranchSelect.selectedIndex] || Array.from(depBranchSelect.options).find(opt => opt.value === attData.branchId);
+      
+      let inArea = true;
+      if (selectedOption) {
+        const depBranchLat = parseFloat(selectedOption.dataset.lat);
+        const depBranchLng = parseFloat(selectedOption.dataset.lng);
+        const depBranchRadius = parseFloat(selectedOption.dataset.radius);
+        const distance = getDistance(latitude, longitude, depBranchLat, depBranchLng);
+        if (distance > depBranchRadius && currentUser.role !== "admin") {
+          inArea = false;
+        }
+      }
+
+      if (!inArea) {
+        loader.style.display = "none";
+        return alert("❌ Outside deputation branch area!");
+      }
+
+      await updateDoc(attRef, { outTime: serverTimestamp() });
+      attData.outTime = { toDate: () => new Date() };
+      depOutTimeEl.textContent = formatDateTime(attData.outTime);
+
+      alert("✅ Deputation Checked Out Successfully!");
+      updateButtonState();
+      loader.style.display = "none";
+    }, (error) => {
+      loader.style.display = "none";
+      alert("❌ Location error: " + error.message);
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 });
+  };
 };
 
