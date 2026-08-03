@@ -7,11 +7,7 @@
   <title>Login - Branch Attendance</title>
   <link rel="icon" type="image/png"href="./assets/images/icon.png">
   <link rel="stylesheet" href="./assets/css/mobil.css">
-  <link rel="manifest" href="./manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Art Group">
-  <link rel="apple-touch-icon" href="./assets/images/icon.png">
+  <link rel="manifest" href="./resources/manifest.json">
 </head>
 
 <div class="login-card">
@@ -46,7 +42,7 @@
   <script type="module" src="./assets/js/auth.js"></script>
   <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js')
+    navigator.serviceWorker.register('./resources/service-worker.js')
       .then(() => console.log("Service Worker registered"))
       .catch(err => console.error("SW registration failed", err));
   }

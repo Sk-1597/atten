@@ -36,27 +36,6 @@
     </div>
   </section>
 
-<!---Deputation-->
-  <section class="card">
-    <div class="card-header">
-      <h3>Deputation</h3>
-      <div class="check-bttn">
-        <button id="depCheckinBtn" class="btn checkin">Check In</button><br>
-        <button id="depCheckoutBtn" class="btn checkout">Check Out</button>
-      </div>
-    </div>
-    <div class="card-body blue">
-      <p class="branch">
-        <img src="./assets/icons/location.png">
-        <select id="depBranchSelect" style="margin-left:5px; padding:3px; border-radius:3px; width: 60%; background: transparent; border: 1px solid #ccc; color: inherit; font-family: inherit;">
-          <option value="" disabled selected>Select Branch</option>
-        </select>
-      </p>
-      <p><img src="./assets/icons/checkin.png"><span id="depInTime">--</span></p>
-      <p><img src="./assets/icons/checkout.png"><span id="depOutTime">--</span></p>
-    </div>
-  </section>
-
 <!---Break Time------>
   <section class="card brake">
     <div class="card-header">
@@ -66,8 +45,16 @@
         <button id="brkin" class="btn brkout">In</button>
       </div>
     </div>
-    <div class="card-body red" id="breaksContainer">
-      <!-- Breaks will be dynamically added here -->
+    <div class="card-body red">
+      <p><img src="./assets/icons/checkout 2.png">
+        <span id="breakOutTime">-</span>
+      </p>
+      <p><img src="./assets/icons/checkin 2.png">
+        <span id="breakInTime">-</span>
+      </p>
+      <p><img src="./assets/icons/purpose.png">
+        <span id="breakPurpose">-</span>
+      </p>
     </div>
   </section>
 
@@ -103,11 +90,7 @@
 <div id="breakPopup" class="popup-overlay" >
   <div class="popup">
     <h3>Break Out</h3>
-    <p>Please select type and reason for break:</p>
-    <select id="breakTypeInput" style="margin-bottom:10px; width:100%; padding:8px; border-radius:5px;">
-      <option value="Personal">Personal</option>
-      <option value="Official">Official</option>
-    </select>
+    <p>Please enter the reason for break:</p>
     <textarea id="breakPurposeInput" placeholder="e.g. Hospital, Bank visit..." rows="3"></textarea>
     <div class="popup-buttons">
       <button id="breakConfirm" class="btn confirm">Confirm</button>
