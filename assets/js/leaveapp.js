@@ -1,4 +1,4 @@
-import {  db,  getDoc,  doc,  addDoc,  updateDoc,  deleteDoc,  collection,  getDocs,  query,  where,  serverTimestamp,} from "./database.js";
+import {  db,  getDoc,  doc,  addDoc,  updateDoc,  deleteDoc,  collection,  getDocs,  query,  where,  serverTimestamp, orderBy, limit } from "./database.js";
 import { loader, currentUser } from "./utils/loggeduser.js";
 import { formatDate } from './utils/formatdate.js';
 
@@ -31,7 +31,7 @@ async function loadTodayLeave() {
   try {
     const leaveRef = query(
       collection(db, "leaveRequests"),
-      where("userId", "==", currentUser.id),
+      where("userId", "==", currentUser.id)
     );
 
     const snapshot = await getDocs(leaveRef);
@@ -46,8 +46,15 @@ async function loadTodayLeave() {
     }
 
     // ✅ show leave data
-    const docData = snapshot.docs[0].data();
-    todayLeaveDocId = snapshot.docs[0].id;
+    // Sort locally by createdAt descending to avoid missing composite index errors
+    const sortedDocs = snapshot.docs.sort((a, b) => {
+      const dateA = new Date(a.data().createdAt || 0);
+      const dateB = new Date(b.data().createdAt || 0);
+      return dateB - dateA; // Descending
+    });
+
+    const docData = sortedDocs[0].data();
+    todayLeaveDocId = sortedDocs[0].id;
 
     ApplyDate.textContent = formatDate(docData.createdAt) || "-";
     leaveDate.textContent = formatDate(docData.fromDate) || "-";
@@ -78,14 +85,30 @@ ConfirmLev.onclick = async () => {
     const leaveRef = collection(db, "leaveRequests");
     const q = query(
       leaveRef,
-      where("userId", "==", currentUser.id),
-      where("levDate", "==", levFrom)
+      where("userId", "==", currentUser.id)
     );
 
     const snapshot = await getDocs(q);
 
-    if (!snapshot.empty) {
-      alert("You have already applied for leave on this date!");
+    let alreadyApplied = false;
+    const nFrom = levFrom;
+    const nTo = levToDate || levFrom;
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if ((data.status === "Pending" || data.status === "Approved") && data.fromDate) {
+        const eFrom = data.fromDate;
+        const eTo = data.toDate || data.fromDate;
+
+        // String comparison works perfectly for YYYY-MM-DD format
+        if (nFrom <= eTo && nTo >= eFrom) {
+          alreadyApplied = true;
+        }
+      }
+    });
+
+    if (alreadyApplied) {
+      alert("already mark in that days");
       if (leavePopup) leavePopup.style.display = "none";
       return;
     }
@@ -130,7 +153,7 @@ cslLeav.onclick = async () => {
   if (!confirmDelete) return;
 
   try {
-    await deleteDoc(doc(db, "leaveapply", todayLeaveDocId));
+    await deleteDoc(doc(db, "leaveRequests", todayLeaveDocId));
     alert("Leave cancelled successfully!");
     if (alyLeav) alyLeav.style.display = "flex";
     todayLeaveDocId = null;
