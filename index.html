@@ -40,6 +40,7 @@
   <div class="links">
     <a href="tel:8943359116">Help</a>
     <a href="tel:8943359150">Forgot?</a>
+    <a href="#" id="clearCacheBtn" style="color: #f83f3f; cursor: pointer;">Clear Cache</a>
   </div>
 </div>
 
@@ -50,6 +51,25 @@
       .then(() => console.log("Service Worker registered"))
       .catch(err => console.error("SW registration failed", err));
   }
+
+  document.getElementById('clearCacheBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        for (let name of names)
+          caches.delete(name);
+      });
+    }
+    alert('Cache cleared! The app will now reload.');
+    window.location.reload(true);
+  });
 </script>
 </body>
 </html>

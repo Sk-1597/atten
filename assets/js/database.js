@@ -4,7 +4,7 @@ import { getFirestore, getDoc, doc, addDoc, updateDoc, deleteDoc, collection, ge
 
 const firebaseConfig = {
    // main db
-  
+   /*
      apiKey: "AIzaSyCOcsL9ahdFUunWDAcv5JZdnMxMZehquhg",
      authDomain: "art-staffmanage.firebaseapp.com",
      projectId: "art-staffmanage",
@@ -12,9 +12,9 @@ const firebaseConfig = {
      messagingSenderId: "951269778971",
      appId: "1:951269778971:web:11fbb26385588ced133abe"
   
-  
+  */
    //test db
-/*
+
    apiKey: "AIzaSyArh9Lqdyio6QZ276L2ciMwEgU8BgigrFs",
    authDomain: "user-atten.firebaseapp.com",
    databaseURL: "https://user-atten-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -22,7 +22,7 @@ const firebaseConfig = {
    storageBucket: "user-atten.firebasestorage.app",
    messagingSenderId: "13092297593",
    appId: "1:13092297593:web:dd99a876e5dec1714fada8"
-*/
+
 };
 
 const app = initializeApp(firebaseConfig);
